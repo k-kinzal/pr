@@ -7,4 +7,5 @@ require (
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0
 )

@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/time/rate"
 
 	"github.com/google/go-github/v28/github"
 	jmespath "github.com/jmespath/go-jmespath"
@@ -19,9 +22,9 @@ const (
 
 type PullRequest struct {
 	*github.PullRequest
-	Owner    *string   `json:"-"`
-	Repo     *string   `json:"-"`
-	Statuses []*Status `json:"statuses,omitempty"`
+	Owner    *string              `json:"-"`
+	Repo     *string              `json:"-"`
+	Statuses []*github.RepoStatus `json:"statuses"`
 }
 
 func (pr *PullRequest) GetOwner() string {
@@ -130,7 +133,7 @@ func (f *PullsFilter) Apply(data []*PullRequest) ([]*PullRequest, error) {
 	if err := json.Unmarshal(replaced, &v); err != nil {
 		return nil, err
 	}
-	fmt.Println(f.Expression())
+
 	filtered, err := jmespath.Search(f.Expression(), v)
 	if err != nil {
 		return nil, fmt.Errorf("jmespath: %s", err)
@@ -188,124 +191,128 @@ func NewPullsFilter(rules []string, limit int) *PullsFilter {
 }
 
 func (c *Client) GetPulls(ctx context.Context, owner string, repo string, filter *PullsFilter) ([]*PullRequest, error) {
-	conv := func(ctx context.Context, pulls []*github.PullRequest) ([]*PullRequest, error) {
-		childCtx, cancel := context.WithCancel(ctx)
-		defer cancel()
-		ch := make(chan *PullRequest)
-		errCh := make(chan error)
-		for _, pull := range pulls {
-			go func() {
-				statuses, _, err := c.github.Statuses.List(childCtx, owner, repo, pull.GetHead().GetRef())
-				if err != nil {
-					errCh <- err
-					return
-				}
-				ch <- &PullRequest{
-					PullRequest: pull,
-					Statuses:    statuses,
-				}
-			}()
-		}
-		var allPulls []*PullRequest
-		for i := 0; i < len(pulls); i++ {
-			select {
-			case <-ctx.Done():
-				if err := ctx.Err(); err != nil {
-					return nil, err
-				}
-				break
-			case pull, _ := <-ch:
-				allPulls = append(allPulls, pull)
-			case err, _ := <-errCh:
-				cancel()
-				return nil, err
-			}
-		}
-		return allPulls, nil
-	}
-
-	opt := &github.PullRequestListOptions{
-		State:       filter.GetState(),
-		Head:        filter.GetHead(),
-		Base:        filter.GetBase(),
-		Sort:        "created",
-		Direction:   "desc",
-		ListOptions: github.ListOptions{PerPage: PerPage},
-	}
-	nextPage := -1
-	allPage := 0
-
-	var pulls []*github.PullRequest
-	if num := filter.GetNumber(); num > 0 {
-		pull, _, err := c.github.PullRequests.Get(ctx, owner, repo, num)
-		if err != nil {
-			return nil, err
-		}
-		pulls = append(pulls, pull)
-		nextPage = -1
-		allPage = 1
-	} else {
-		p, resp, err := c.github.PullRequests.List(ctx, owner, repo, opt)
-		if err != nil {
-			return nil, err
-		}
-		pulls = append(pulls, p...)
-		nextPage = resp.NextPage
-		allPage = resp.LastPage
-	}
-
-	if nextPage == -1 || filter.GetLimit() > PerPage {
-		p, err := conv(ctx, pulls)
-		if err != nil {
-			return nil, err
-		}
-		return filter.Apply(p)
-	}
-
-	if allPage > (filter.GetLimit() / PerPage) {
-		allPage = filter.GetLimit() / PerPage
-	}
-
-	allPulls, err := conv(ctx, pulls)
-	if err != nil {
-		return nil, err
-	}
-
 	childCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	ch := make(chan []*PullRequest)
-	errCh := make(chan error)
-	for page := 1; page < allPage; page++ {
+	rateLimit := 10
+	requestNum := 0
+	limiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(rateLimit)), rateLimit)
+	getAllPage := func(ch chan interface{}, errCh chan error, limit int, callback func(opt *github.ListOptions) (interface{}, *github.Response, error)) {
+		requestNum++
 		go func() {
-			opt.Page = page
-			pulls, _, err := c.github.PullRequests.List(childCtx, owner, repo, opt)
+			if err := limiter.Wait(childCtx); err != nil {
+				errCh <- err
+				return
+			}
+			opt := &github.ListOptions{
+				Page:    0,
+				PerPage: PerPage,
+			}
+			data, resp, err := callback(opt)
 			if err != nil {
 				errCh <- err
 				return
 			}
-			p, err := conv(ctx, pulls)
-			if err != nil {
-				errCh <- err
+			ch <- data
+			if resp.NextPage == -1 {
 				return
 			}
-			ch <- p
+			allPage := resp.LastPage
+			if limit > 0 && allPage > limit/opt.PerPage {
+				allPage = limit / opt.PerPage
+			}
+			for i := 1; i < allPage; i++ {
+				requestNum++
+				go func(page int) {
+					if err := limiter.Wait(childCtx); err != nil {
+						errCh <- err
+						return
+					}
+					opt.Page = page
+					data, _, err := callback(opt)
+					if err != nil {
+						errCh <- err
+						return
+					}
+					ch <- data
+				}(i)
+			}
 		}()
 	}
 
-	for i := 1; i < allPage; i++ {
+	ch := make(chan interface{})
+	errCh := make(chan error)
+
+	if num := filter.GetNumber(); num > 0 {
+		requestNum++
+		go func() {
+			pull, _, err := c.github.PullRequests.Get(childCtx, owner, repo, num)
+			if err != nil {
+				errCh <- err
+				return
+			}
+			ch <- []*github.PullRequest{pull}
+		}()
+	} else {
+		getAllPage(ch, errCh, filter.GetLimit(), func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+			pullOptions := &github.PullRequestListOptions{
+				State:       filter.GetState(),
+				Head:        filter.GetHead(),
+				Base:        filter.GetBase(),
+				Sort:        "created",
+				Direction:   "desc",
+				ListOptions: *opt,
+			}
+			return c.github.PullRequests.List(childCtx, owner, repo, pullOptions)
+		})
+	}
+
+	pulls := make([]*github.PullRequest, 0)
+	statusesMap := make(map[string][]*github.RepoStatus, 0)
+	for i := 0; i < requestNum; i++ {
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
 			break
-		case pulls, _ := <-ch:
-			allPulls = append(allPulls, pulls...)
+		case data := <-ch:
+			switch reflect.TypeOf(data).Kind() {
+			case reflect.Slice, reflect.Array:
+				v := reflect.ValueOf(data)
+				for i := 0; i < v.Len(); i++ {
+					switch vv := v.Index(i).Interface().(type) {
+					case *github.PullRequest:
+						pulls = append(pulls, vv)
+						func(pull *github.PullRequest) {
+							getAllPage(ch, errCh, -1, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+								return c.github.Repositories.ListStatuses(childCtx, owner, repo, pull.GetHead().GetSHA(), opt)
+							})
+						}(vv)
+					case *github.RepoStatus:
+						s := strings.Split(vv.GetURL(), "/")
+						statusesMap[s[len(s)-1]] = append(statusesMap[s[len(s)-1]], vv)
+					}
+				}
+			}
 		case err, _ := <-errCh:
 			cancel()
 			return nil, err
 		}
+	}
+
+	var allPulls []*PullRequest
+	for _, pull := range pulls {
+		statuses, ok := statusesMap[pull.GetHead().GetRef()]
+		if !ok {
+			statuses = make([]*github.RepoStatus, 0)
+		}
+		allPulls = append(allPulls, &PullRequest{
+			PullRequest: pull,
+			Owner:       &owner,
+			Repo:        &repo,
+			Statuses:    statuses,
+		})
 	}
 
 	return filter.Apply(allPulls)
