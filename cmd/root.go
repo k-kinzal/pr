@@ -27,12 +27,14 @@ var (
 			globalOption.Repo = s[1]
 			return nil
 		},
+		Version: GetVersion(),
 	}
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&globalOption.Token, "token", os.Getenv("GITHUB_TOKEN"), "personal access token to manipulate PR [GITHUB_TOKEN]")
 	rootCmd.PersistentFlags().BoolVar(&exitCode, "exit-code", false, "returns an exit code of 127 if no PR matches the rule")
+	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 }
 
 func Execute() error {
