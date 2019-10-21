@@ -1,5 +1,7 @@
 # PR
 
+[![GolangCI](https://golangci.com/badges/github.com/k-kinzal/pr.svg)](https://golangci.com/r/github.com/k-kinzal/pr)
+
 PR is a CLI tool that operates Pull Request on a rule-based basis.
 
 ## Get Started
