@@ -121,7 +121,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 	}
 
 	pulls := make([]*github.PullRequest, 0)
-	statusesMap := make(map[string][]*github.RepoStatus, 0)
+	statusesMap := make(map[string][]*github.RepoStatus)
 	for i := 0; i < requestNum; i++ {
 		select {
 		case <-ctx.Done():
@@ -148,7 +148,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 					}
 				}
 			}
-		case err, _ := <-errCh:
+		case err := <-errCh:
 			cancel()
 			return nil, err
 		}

@@ -55,7 +55,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 				errCh <- err
 				return
 			}
-			if result.GetMerged() == false {
+			if !result.GetMerged() {
 				errCh <- xerrors.New(result.GetMessage())
 
 			}
@@ -81,7 +81,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 			break
 		case pull := <-ch:
 			allPulls = append(allPulls, pull)
-		case err, _ := <-errCh:
+		case err := <-errCh:
 			cancel()
 			return nil, err
 		}
