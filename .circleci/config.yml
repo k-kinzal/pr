@@ -4,6 +4,24 @@ jobs:
     docker:
       - image: circleci/golang:1.13
     working_directory: /go/src/github.com/k-kinzal/pr
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pkg-cache-{{ checksum "./go.sum" }}
+            - v1-pkg-cache
+      - run:
+          name: go build
+          command: make build
+      - save_cache:
+          key: v1-pkg-cache-{{ checksum "./go.sum" }}
+          paths:
+            - "/go/pkg"
+
+  test:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: /go/src/github.com/k-kinzal/pr
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
@@ -11,6 +29,7 @@ jobs:
       - run: mkdir -p $TEST_RESULTS
       - restore_cache:
           keys:
+            - v1-pkg-cache-{{ checksum "./go.sum" }}
             - v1-pkg-cache
       - run: go get github.com/jstemmer/go-junit-report
       - run:
@@ -22,7 +41,7 @@ jobs:
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             make test | tee ${TEST_RESULTS}/go-test.out
       - save_cache:
-          key: v1-pkg-cache
+          key: v1-pkg-cache-{{ checksum "./go.sum" }}
           paths:
             - "/go/pkg"
       - store_artifacts:
@@ -30,3 +49,45 @@ jobs:
           destination: raw-test-output
       - store_test_results:
           path: /tmp/test-results
+
+  release:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: /go/src/github.com/k-kinzal/pr
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pkg-cache-{{ checksum "./go.sum" }}
+            - v1-pkg-cache
+      - run: curl -sL https://git.io/goreleaser | bash
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+
+  test:
+    jobs:
+      - test
+
+  release:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/

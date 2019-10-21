@@ -1,0 +1,11 @@
+builds:
+  - ldflags:
+      - -s -w -X github.com/k-kinzal/pr/cmd.version={{.Version}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"

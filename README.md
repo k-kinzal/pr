@@ -1,6 +1,7 @@
 # PR
 
-[![CircleCI](https://circleci.com/gh/k-kinzal/pr.svg?style=svg)](https://circleci.com/gh/k-kinzal/pr)
+[![Release](https://img.shields.io/github/v/release/k-kinzal/pr.svg?style=flat-square)](https://github.com/k-kinzal/pr/releases/latest)
+[![CircleCI](https://circleci.com/gh/k-kinzal/pr.svg?style=shield)](https://circleci.com/gh/k-kinzal/pr)
 [![GolangCI](https://golangci.com/badges/github.com/k-kinzal/pr.svg)](https://golangci.com/r/github.com/k-kinzal/pr)
 
 PR is a CLI tool that operates Pull Request on a rule-based basis.
