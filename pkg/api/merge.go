@@ -16,7 +16,7 @@ type MergeOption struct {
 	MergeMethod           string
 }
 
-func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt *MergeOption) ([]*PullRequest, error) {
+func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOption) ([]*PullRequest, error) {
 	buf := &bytes.Buffer{}
 	commitTitleTemplate := template.Must(template.New("commit title").Parse(opt.CommitTitleTemplate))
 	commitMessageTemplate := template.Must(template.New("commit message").Parse(opt.CommitMessageTemplate))

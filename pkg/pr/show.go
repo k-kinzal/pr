@@ -10,11 +10,11 @@ import (
 )
 
 type NoMatchError struct {
-	filter *api.PullsFilter
+	rules *api.PullRequestRules
 }
 
 func (e *NoMatchError) Error() string {
-	return fmt.Sprintf("no PR matches the rule: `%s`", e.filter.Expression())
+	return fmt.Sprintf("no PR matches the rule: `%s`", e.rules.Expression())
 }
 
 type Option struct {
@@ -24,21 +24,25 @@ type Option struct {
 }
 
 type PullOption struct {
-	*Option
 	Limit int
+	Rate  int
 	Rules []string
+	Option
 }
 
-func Show(opt *PullOption) error {
+func Show(opt PullOption) error {
 	client := api.NewClient(opt.Token)
-	filter := api.NewPullsFilter(opt.Rules, opt.Limit)
-	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, filter)
+	pullOption := api.PullsOption{
+		Rules:     api.NewPullRequestRules(opt.Rules, opt.Limit),
+		RateLimit: opt.Rate,
+	}
+	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, pullOption)
 	if err != nil {
 		return err
 	}
 	if len(pulls) == 0 {
 		fmt.Fprintln(os.Stdout, "[]")
-		return &NoMatchError{filter}
+		return &NoMatchError{pullOption.Rules}
 	}
 
 	out, err := json.Marshal(pulls)

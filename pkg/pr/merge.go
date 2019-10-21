@@ -13,27 +13,30 @@ type MergeOption struct {
 	CommitTitleTemplate   string
 	CommitMessageTemplate string
 	MergeMethod           string
-	*PullOption
+	PullOption
 }
 
-func Merge(opt *MergeOption) error {
+func Merge(opt MergeOption) error {
 	client := api.NewClient(opt.Token)
-	filter := api.NewPullsFilter(opt.Rules, opt.Limit)
-	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, filter)
+	pullOption := api.PullsOption{
+		Rules:     api.NewPullRequestRules(opt.Rules, opt.Limit),
+		RateLimit: opt.Rate,
+	}
+	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, pullOption)
 	if err != nil {
 		return err
 	}
 	if len(pulls) == 0 {
 		fmt.Fprintln(os.Stdout, "[]")
-		return &NoMatchError{filter}
+		return &NoMatchError{pullOption.Rules}
 	}
 
-	o := &api.MergeOption{
+	mergeOption := api.MergeOption{
 		CommitTitleTemplate:   opt.CommitTitleTemplate,
 		CommitMessageTemplate: opt.CommitMessageTemplate,
 		MergeMethod:           opt.MergeMethod,
 	}
-	mergedPulls, err := client.Merge(context.Background(), pulls, o)
+	mergedPulls, err := client.Merge(context.Background(), pulls, mergeOption)
 	if err != nil {
 		return err
 	}
