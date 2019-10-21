@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/k-kinzal/pr/pkg/api"
+	"golang.org/x/xerrors"
 )
 
 type NoMatchError struct {
@@ -38,7 +39,7 @@ func Show(opt PullOption) error {
 	}
 	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, pullOption)
 	if err != nil {
-		return err
+		return xerrors.Errorf("show: %s", err)
 	}
 	if len(pulls) == 0 {
 		fmt.Fprintln(os.Stdout, "[]")
@@ -47,7 +48,7 @@ func Show(opt PullOption) error {
 
 	out, err := json.Marshal(pulls)
 	if err != nil {
-		return err
+		return xerrors.Errorf("show: %s", err)
 	}
 
 	fmt.Fprintln(os.Stdout, string(out))

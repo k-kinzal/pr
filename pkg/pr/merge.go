@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"golang.org/x/xerrors"
+
 	"github.com/k-kinzal/pr/pkg/api"
 )
 
@@ -38,12 +40,12 @@ func Merge(opt MergeOption) error {
 	}
 	mergedPulls, err := client.Merge(context.Background(), pulls, mergeOption)
 	if err != nil {
-		return err
+		return xerrors.Errorf("merge: %s", err)
 	}
 
 	out, err := json.Marshal(mergedPulls)
 	if err != nil {
-		return err
+		return xerrors.Errorf("merge: %s", err)
 	}
 	fmt.Fprintln(os.Stdout, string(out))
 

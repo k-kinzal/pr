@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/xerrors"
+
 	jmespath "github.com/jmespath/go-jmespath"
 )
 
@@ -95,7 +97,7 @@ func (r *PullRequestRules) Apply(data []*PullRequest) ([]*PullRequest, error) {
 
 	filtered, err := jmespath.Search(r.Expression(), v)
 	if err != nil {
-		return nil, fmt.Errorf("jmespath: %s", err)
+		return nil, xerrors.Errorf("jmespath: %s", err)
 	}
 
 	i := 0

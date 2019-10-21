@@ -3,9 +3,10 @@ package api
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"text/template"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	"github.com/google/go-github/v28/github"
 )
@@ -55,7 +56,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 				return
 			}
 			if result.GetMerged() == false {
-				errCh <- fmt.Errorf("merge: %s", result.GetMessage())
+				errCh <- xerrors.New(result.GetMessage())
 
 			}
 
