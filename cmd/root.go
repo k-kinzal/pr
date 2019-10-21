@@ -37,7 +37,9 @@ var (
 
 			return nil
 		},
-		Version: GetVersion(),
+		Version:       GetVersion(),
+		SilenceErrors: true,
+		SilenceUsage:  true,
 	}
 )
 

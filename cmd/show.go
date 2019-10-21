@@ -33,6 +33,8 @@ var (
 			}
 			return nil
 		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
 	}
 )
 
