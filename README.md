@@ -10,7 +10,25 @@ PR is a CLI tool that operates Pull Request on a rule-based basis.
 ## Get Started
 
 ```bash
-
+$ curl -L https://github.com/k-kinzal/pr/releases/download/v0.1.0/pr_linux_amd64.tar.gz | tar xz
+$ cp pr /usr/local/bin/pr
+$ pr --help
+  PR operates multiple Pull Request
+  
+  Usage:
+    pr [flags]
+    pr [command]
+  
+  Available Commands:
+    help        Help about any command
+    merge       Merge PR that matches a rule
+    show        Show PR that matches a rule
+  
+  Flags:
+        --exit-code      returns an exit code of 127 if no PR matches the rule
+    -h, --help           help for pr
+        --token string   personal access token to manipulate PR [GITHUB_TOKEN]
+        --version        version for pr
 ```
 
 ## Operations
