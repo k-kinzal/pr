@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
+
+	"golang.org/x/xerrors"
 
 	"github.com/k-kinzal/pr/pkg/pr"
 	"github.com/spf13/cobra"
@@ -20,11 +21,20 @@ var (
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return fmt.Errorf("`owner/repo` argument is required")
+				return xerrors.New("`owner/repo` argument is required")
 			}
 			s := strings.Split(args[0], "/")
 			globalOption.Owner = s[0]
 			globalOption.Repo = s[1]
+
+			if globalOption.Token == "" {
+				globalOption.Token = os.Getenv("GITHUB_TOKEN")
+			}
+
+			if globalOption.Token == "" {
+				return xerrors.New("--token or GITHUB_TOKEN is required")
+			}
+
 			return nil
 		},
 		Version: GetVersion(),
@@ -32,7 +42,7 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&globalOption.Token, "token", os.Getenv("GITHUB_TOKEN"), "personal access token to manipulate PR [GITHUB_TOKEN]")
+	rootCmd.PersistentFlags().StringVar(&globalOption.Token, "token", "", "personal access token to manipulate PR [GITHUB_TOKEN]")
 	rootCmd.PersistentFlags().BoolVar(&exitCode, "exit-code", false, "returns an exit code of 127 if no PR matches the rule")
 	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 }
