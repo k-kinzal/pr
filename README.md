@@ -1,5 +1,6 @@
 # PR
 
+[![CircleCI](https://circleci.com/gh/k-kinzal/pr.svg?style=svg)](https://circleci.com/gh/k-kinzal/pr)
 [![GolangCI](https://golangci.com/badges/github.com/k-kinzal/pr.svg)](https://golangci.com/r/github.com/k-kinzal/pr)
 
 PR is a CLI tool that operates Pull Request on a rule-based basis.
@@ -581,7 +582,7 @@ $ pr show [owner]/[repo] -l 'state == `"open"`' -l 'length(statuses) == length(s
 ```
 
 ```
-[?state == `"open"`] | [?length(statuses) == length(statuses[?state == `"success"`]]
+[?state == `"open"`] | [?length(statuses) == length(statuses[?state == `"success"`])]
 ```
 
 The specified rule is converted to an expression that combines [Filter Expression](http://jmespath.org/proposals/filter-expressions.html) with a pipe.

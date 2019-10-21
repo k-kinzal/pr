@@ -14,13 +14,16 @@ import (
 )
 
 var (
+	Now               = time.Now().UTC().Unix()
 	dateLayout        = "2006-01-02T15:04:05Z"
-	numberRegexp      = regexp.MustCompile("number\\s*==\\s*`([0-9]*?)`")
-	stateRegexp       = regexp.MustCompile("state\\s*==\\s*`\"(.*?)\"`")
-	headRegexp        = regexp.MustCompile("head\\s*==\\s*`\"(.*?)\"`")
-	baseRegexp        = regexp.MustCompile("base\\s*==\\s*`\"(.*?)\"`")
+	githubDateLayout  = time.RFC3339
+	numberRegexp      = regexp.MustCompile("number\\s*[=!<>]=?\\s*`([0-9]*?)`")
+	stateRegexp       = regexp.MustCompile("state\\s*[=!]=\\s*`\"(.*?)\"`")
+	headRegexp        = regexp.MustCompile("head\\s*[=!]=\\s*`\"(.*?)\"`")
+	baseRegexp        = regexp.MustCompile("base\\s*[=!]=\\s*`\"(.*?)\"`")
 	dateRegexp        = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`)
 	timeRegexp        = regexp.MustCompile(`"\d{2}:\d{2}:\d{2}"`)
+	githubDateRegexp  = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}"`)
 	nowFunctionRegexp = regexp.MustCompile(`now\(\)`)
 )
 
@@ -83,8 +86,8 @@ func (r *PullRequestRules) Apply(data []*PullRequest) ([]*PullRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	replaced := dateRegexp.ReplaceAllFunc(out, func(bytes []byte) []byte {
-		t, err := time.Parse(dateLayout, strings.Trim(string(bytes), "\""))
+	replaced := githubDateRegexp.ReplaceAllFunc(out, func(bytes []byte) []byte {
+		t, err := time.Parse(githubDateLayout, strings.Trim(string(bytes), "\""))
 		if err != nil {
 			return bytes
 		}
@@ -121,7 +124,7 @@ func (r *PullRequestRules) Apply(data []*PullRequest) ([]*PullRequest, error) {
 }
 
 func NewPullRequestRules(rules []string, limit int) *PullRequestRules {
-	now := fmt.Sprintf("`%d`", time.Now().UTC().Unix())
+	now := fmt.Sprintf("`%d`", Now)
 
 	var number int
 	var state string

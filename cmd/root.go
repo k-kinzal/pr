@@ -32,7 +32,7 @@ var (
 			}
 
 			if globalOption.Token == "" {
-				return xerrors.New("--token or GITHUB_TOKEN is required")
+				return xerrors.New("GITHUB_TOKEN or --token arguments is required")
 			}
 
 			return nil
