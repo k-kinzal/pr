@@ -3,6 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/k-kinzal/pr.svg?style=flat-square)](https://github.com/k-kinzal/pr/releases/latest)
 [![CircleCI](https://circleci.com/gh/k-kinzal/pr.svg?style=shield)](https://circleci.com/gh/k-kinzal/pr)
 [![GolangCI](https://golangci.com/badges/github.com/k-kinzal/pr.svg)](https://golangci.com/r/github.com/k-kinzal/pr)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr?ref=badge_shield)
 
 PR is a CLI tool that operates Pull Request on a rule-based basis.
 
@@ -613,3 +614,6 @@ $ pr show [owner]/[repo] -l
 ```
 
 `now()` returns the current unix time.
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr?ref=badge_large)
