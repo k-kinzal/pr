@@ -156,7 +156,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 
 	var allPulls []*PullRequest
 	for _, pull := range pulls {
-		statuses, ok := statusesMap[pull.GetHead().GetRef()]
+		statuses, ok := statusesMap[pull.GetHead().GetSHA()]
 		if !ok {
 			statuses = make([]*github.RepoStatus, 0)
 		}
