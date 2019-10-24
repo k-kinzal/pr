@@ -18,6 +18,7 @@ type PullRequest struct {
 	Owner    *string                      `json:"-"`
 	Repo     *string                      `json:"-"`
 	Comments []*github.PullRequestComment `json:"comments"`
+	Reviews  []*github.PullRequestReview  `json:"reviews"`
 	Statuses []*github.RepoStatus         `json:"statuses"`
 }
 
@@ -110,6 +111,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 
 	pulls := make([]*github.PullRequest, 0)
 	commentsMap := make(map[int][]*github.PullRequestComment)
+	reviewsMap := make(map[int][]*github.PullRequestReview)
 	statusesMap := make(map[string][]*github.RepoStatus)
 	for i := 0; i < requestNum; i++ {
 		select {
@@ -136,6 +138,9 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 								return c.github.PullRequests.ListComments(childCtx, owner, repo, pull.GetNumber(), listCommentOptions)
 							})
 							getAllPage(ch, errCh, -1, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+								return c.github.PullRequests.ListReviews(childCtx, owner, repo, pull.GetNumber(), opt)
+							})
+							getAllPage(ch, errCh, -1, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
 								return c.github.Repositories.ListStatuses(childCtx, owner, repo, pull.GetHead().GetSHA(), opt)
 							})
 						}(vv)
@@ -144,6 +149,11 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 						s := strings.Split(vv.GetPullRequestURL(), "/")
 						number, _ := strconv.Atoi(s[len(s)-1])
 						commentsMap[number] = append(commentsMap[number], vv)
+					case *github.PullRequestReview:
+						// https://api.github.com/repos/[owner]/[repo]/pulls/[pr number]
+						s := strings.Split(vv.GetPullRequestURL(), "/")
+						number, _ := strconv.Atoi(s[len(s)-1])
+						reviewsMap[number] = append(reviewsMap[number], vv)
 					case *github.RepoStatus:
 						// https://api.github.com/repos/[owner]/[repo]/statuses/[sha]
 						s := strings.Split(vv.GetURL(), "/")
@@ -163,6 +173,10 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 		if !ok {
 			comments = make([]*github.PullRequestComment, 0)
 		}
+		reviews, ok := reviewsMap[pull.GetNumber()]
+		if !ok {
+			reviews = make([]*github.PullRequestReview, 0)
+		}
 		statuses, ok := statusesMap[pull.GetHead().GetSHA()]
 		if !ok {
 			statuses = make([]*github.RepoStatus, 0)
@@ -172,6 +186,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 			Owner:       &owner,
 			Repo:        &repo,
 			Comments:    comments,
+			Reviews:     reviews,
 			Statuses:    statuses,
 		})
 	}
