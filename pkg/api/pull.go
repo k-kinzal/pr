@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v28/github"
@@ -14,9 +15,10 @@ const (
 
 type PullRequest struct {
 	*github.PullRequest
-	Owner    *string              `json:"-"`
-	Repo     *string              `json:"-"`
-	Statuses []*github.RepoStatus `json:"statuses"`
+	Owner    *string                      `json:"-"`
+	Repo     *string                      `json:"-"`
+	Comments []*github.PullRequestComment `json:"comments"`
+	Statuses []*github.RepoStatus         `json:"statuses"`
 }
 
 func (pr *PullRequest) GetOwner() string {
@@ -107,6 +109,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 	}
 
 	pulls := make([]*github.PullRequest, 0)
+	commentsMap := make(map[int][]*github.PullRequestComment)
 	statusesMap := make(map[string][]*github.RepoStatus)
 	for i := 0; i < requestNum; i++ {
 		select {
@@ -125,10 +128,24 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 						pulls = append(pulls, vv)
 						func(pull *github.PullRequest) {
 							getAllPage(ch, errCh, -1, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+								listCommentOptions := &github.PullRequestListCommentsOptions{
+									Sort:        "created",
+									Direction:   "desc",
+									ListOptions: *opt,
+								}
+								return c.github.PullRequests.ListComments(childCtx, owner, repo, pull.GetNumber(), listCommentOptions)
+							})
+							getAllPage(ch, errCh, -1, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
 								return c.github.Repositories.ListStatuses(childCtx, owner, repo, pull.GetHead().GetSHA(), opt)
 							})
 						}(vv)
+					case *github.PullRequestComment:
+						// https://api.github.com/repos/[owner]/[repo]/pulls/[pr number]
+						s := strings.Split(vv.GetPullRequestURL(), "/")
+						number, _ := strconv.Atoi(s[len(s)-1])
+						commentsMap[number] = append(commentsMap[number], vv)
 					case *github.RepoStatus:
+						// https://api.github.com/repos/[owner]/[repo]/statuses/[sha]
 						s := strings.Split(vv.GetURL(), "/")
 						statusesMap[s[len(s)-1]] = append(statusesMap[s[len(s)-1]], vv)
 					}
@@ -142,6 +159,10 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 
 	var allPulls []*PullRequest
 	for _, pull := range pulls {
+		comments, ok := commentsMap[pull.GetNumber()]
+		if !ok {
+			comments = make([]*github.PullRequestComment, 0)
+		}
 		statuses, ok := statusesMap[pull.GetHead().GetSHA()]
 		if !ok {
 			statuses = make([]*github.RepoStatus, 0)
@@ -150,6 +171,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 			PullRequest: pull,
 			Owner:       &owner,
 			Repo:        &repo,
+			Comments:    comments,
 			Statuses:    statuses,
 		})
 	}
