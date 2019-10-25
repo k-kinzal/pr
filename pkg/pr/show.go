@@ -32,12 +32,19 @@ type PullOption struct {
 }
 
 func Show(opt PullOption) error {
-	client := api.NewClient(opt.Token)
-	pullOption := api.PullsOption{
-		Rules:     api.NewPullRequestRules(opt.Rules, opt.Limit),
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	clientOption := &api.Options{
+		Token:     opt.Token,
 		RateLimit: opt.Rate,
 	}
-	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, pullOption)
+	client := api.NewClient(ctx, clientOption)
+
+	pullOption := api.PullsOption{
+		Rules: api.NewPullRequestRules(opt.Rules, opt.Limit),
+	}
+	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
 	if err != nil {
 		return xerrors.Errorf("show: %s", err)
 	}

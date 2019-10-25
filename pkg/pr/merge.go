@@ -19,12 +19,19 @@ type MergeOption struct {
 }
 
 func Merge(opt MergeOption) error {
-	client := api.NewClient(opt.Token)
-	pullOption := api.PullsOption{
-		Rules:     api.NewPullRequestRules(opt.Rules, opt.Limit),
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	clientOption := &api.Options{
+		Token:     opt.Token,
 		RateLimit: opt.Rate,
 	}
-	pulls, err := client.GetPulls(context.Background(), opt.Owner, opt.Repo, pullOption)
+	client := api.NewClient(ctx, clientOption)
+
+	pullOption := api.PullsOption{
+		Rules: api.NewPullRequestRules(opt.Rules, opt.Limit),
+	}
+	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
 	if err != nil {
 		return err
 	}
@@ -38,7 +45,7 @@ func Merge(opt MergeOption) error {
 		CommitMessageTemplate: opt.CommitMessageTemplate,
 		MergeMethod:           opt.MergeMethod,
 	}
-	mergedPulls, err := client.Merge(context.Background(), pulls, mergeOption)
+	mergedPulls, err := client.Merge(ctx, pulls, mergeOption)
 	if err != nil {
 		return xerrors.Errorf("merge: %s", err)
 	}
