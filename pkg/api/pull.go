@@ -4,9 +4,6 @@ import (
 	"context"
 	"reflect"
 	"strings"
-	"time"
-
-	"golang.org/x/time/rate"
 
 	"github.com/google/go-github/v28/github"
 )
@@ -39,24 +36,17 @@ func (pr *PullRequest) GetRepo() string {
 }
 
 type PullsOption struct {
-	Rules     *PullRequestRules
-	RateLimit int
+	Rules *PullRequestRules
 }
 
 func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt PullsOption) ([]*PullRequest, error) {
 	childCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	rateLimit := opt.RateLimit
 	requestNum := 0
-	limiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(rateLimit)), rateLimit)
 	getAllPage := func(ch chan interface{}, errCh chan error, limit int, callback func(listOptions *github.ListOptions) (interface{}, *github.Response, error)) {
 		requestNum++
 		go func() {
-			if err := limiter.Wait(childCtx); err != nil {
-				errCh <- err
-				return
-			}
 			listOptions := &github.ListOptions{
 				Page:    0,
 				PerPage: PerPage,
@@ -77,10 +67,6 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 			for i := 1; i < allPage; i++ {
 				requestNum++
 				go func(page int) {
-					if err := limiter.Wait(childCtx); err != nil {
-						errCh <- err
-						return
-					}
 					listOptions.Page = page
 					data, _, err := callback(listOptions)
 					if err != nil {
