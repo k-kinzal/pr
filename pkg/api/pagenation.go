@@ -42,14 +42,15 @@ func (p *Pagenation) Request(ctx context.Context, callback func(opt *github.List
 func (p *Pagenation) RequestWithLimit(ctx context.Context, maxPage int, callback func(opt *github.ListOptions) (interface{}, *github.Response, error)) {
 	wg := new(sync.WaitGroup)
 
-	var receiver <-chan *PagenationResult = p.ch
-	p.ch = make(chan *PagenationResult)
+	receiver := p.ch
+	sender := make(chan *PagenationResult)
+	p.ch = sender
 	if receiver != nil {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for v := range receiver {
-				p.ch <- v
+				sender <- v
 			}
 		}()
 	}
@@ -63,10 +64,10 @@ func (p *Pagenation) RequestWithLimit(ctx context.Context, maxPage int, callback
 			case reflect.Slice, reflect.Array:
 				v := reflect.ValueOf(data)
 				for i := 0; i < v.Len(); i++ {
-					p.ch <- &PagenationResult{v.Index(i).Interface(), resp, err}
+					sender <- &PagenationResult{v.Index(i).Interface(), resp, err}
 				}
 			default:
-				p.ch <- &PagenationResult{data, resp, err}
+				sender <- &PagenationResult{data, resp, err}
 			}
 			return data, resp, err
 		}
@@ -95,7 +96,7 @@ func (p *Pagenation) RequestWithLimit(ctx context.Context, maxPage int, callback
 
 	go func() {
 		wg.Wait()
-		close(p.ch)
+		close(sender)
 	}()
 }
 

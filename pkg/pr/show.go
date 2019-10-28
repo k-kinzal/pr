@@ -25,9 +25,13 @@ type Option struct {
 }
 
 type PullOption struct {
-	Limit int
-	Rate  int
-	Rules []string
+	Limit           int
+	Rate            int
+	Rules           []string
+	DisableComments bool
+	DisableReviews  bool
+	DisableCommits  bool
+	DisableStatuses bool
 	Option
 }
 
@@ -42,7 +46,11 @@ func Show(opt PullOption) error {
 	client := api.NewClient(ctx, clientOption)
 
 	pullOption := api.PullsOption{
-		Rules: api.NewPullRequestRules(opt.Rules, opt.Limit),
+		DisableComments: opt.DisableComments,
+		DisableReviews:  opt.DisableReviews,
+		DisableCommits:  opt.DisableCommits,
+		DisableStatuses: opt.DisableStatuses,
+		Rules:           api.NewPullRequestRules(opt.Rules, opt.Limit),
 	}
 	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
 	if err != nil {

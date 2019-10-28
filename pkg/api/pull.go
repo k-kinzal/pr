@@ -35,7 +35,11 @@ func (pr *PullRequest) GetRepo() string {
 }
 
 type PullsOption struct {
-	Rules *PullRequestRules
+	DisableComments bool
+	DisableReviews  bool
+	DisableCommits  bool
+	DisableStatuses bool
+	Rules           *PullRequestRules
 }
 
 func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt PullsOption) ([]*PullRequest, error) {
@@ -86,23 +90,31 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 			switch v := res.Interface().(type) {
 			case *github.PullRequest:
 				pulls = append(pulls, v)
-				pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
-					listCommentOptions := &github.PullRequestListCommentsOptions{
-						Sort:        "created",
-						Direction:   "desc",
-						ListOptions: *opt,
-					}
-					return c.github.PullRequests.ListComments(childCtx, owner, repo, v.GetNumber(), listCommentOptions)
-				})
-				pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
-					return c.github.PullRequests.ListReviews(childCtx, owner, repo, v.GetNumber(), opt)
-				})
-				pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
-					return c.github.PullRequests.ListCommits(childCtx, owner, repo, v.GetNumber(), opt)
-				})
-				pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
-					return c.github.Repositories.ListStatuses(childCtx, owner, repo, v.GetHead().GetSHA(), opt)
-				})
+				if !opt.DisableComments {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						listCommentOptions := &github.PullRequestListCommentsOptions{
+							Sort:        "created",
+							Direction:   "desc",
+							ListOptions: *opt,
+						}
+						return c.github.PullRequests.ListComments(childCtx, owner, repo, v.GetNumber(), listCommentOptions)
+					})
+				}
+				if !opt.DisableReviews {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.PullRequests.ListReviews(childCtx, owner, repo, v.GetNumber(), opt)
+					})
+				}
+				if !opt.DisableCommits {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.PullRequests.ListCommits(childCtx, owner, repo, v.GetNumber(), opt)
+					})
+				}
+				if !opt.DisableStatuses {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.Repositories.ListStatuses(childCtx, owner, repo, v.GetHead().GetSHA(), opt)
+					})
+				}
 			case *github.PullRequestComment:
 				// /repos/[owner]/[repo]/pulls/[pr number]/comments
 				s := strings.Split(res.Response().Request.URL.Path, "/")
@@ -131,19 +143,19 @@ L:
 	var allPulls []*PullRequest
 	for _, pull := range pulls {
 		comments, ok := commentsMap[pull.GetNumber()]
-		if !ok {
+		if !ok && !opt.DisableComments {
 			comments = make([]*github.PullRequestComment, 0)
 		}
 		reviews, ok := reviewsMap[pull.GetNumber()]
-		if !ok {
+		if !ok && !opt.DisableReviews {
 			reviews = make([]*github.PullRequestReview, 0)
 		}
 		commits, ok := commitsMap[pull.GetNumber()]
-		if !ok {
+		if !ok && !opt.DisableCommits {
 			commits = make([]*github.RepositoryCommit, 0)
 		}
 		statuses, ok := statusesMap[pull.GetHead().GetSHA()]
-		if !ok {
+		if !ok && !opt.DisableStatuses {
 			statuses = make([]*github.RepoStatus, 0)
 		}
 		allPulls = append(allPulls, &PullRequest{
