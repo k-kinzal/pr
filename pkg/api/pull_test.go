@@ -51,11 +51,11 @@ func TestClient_GetPulls(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: true,
-		DisableReviews:  true,
-		DisableCommits:  true,
-		DisableStatuses: true,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: false,
+		EnableReviews:  false,
+		EnableCommits:  false,
+		EnableStatuses: false,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
@@ -108,11 +108,11 @@ func TestClient_GetPullsWithComments(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: false,
-		DisableReviews:  true,
-		DisableCommits:  true,
-		DisableStatuses: true,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: true,
+		EnableReviews:  false,
+		EnableCommits:  false,
+		EnableStatuses: false,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
@@ -165,11 +165,11 @@ func TestClient_GetPullsWithReviews(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: true,
-		DisableReviews:  false,
-		DisableCommits:  true,
-		DisableStatuses: true,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: false,
+		EnableReviews:  true,
+		EnableCommits:  false,
+		EnableStatuses: false,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
@@ -222,11 +222,11 @@ func TestClient_GetPullsWithCommits(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: true,
-		DisableReviews:  true,
-		DisableCommits:  false,
-		DisableStatuses: true,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: false,
+		EnableReviews:  false,
+		EnableCommits:  true,
+		EnableStatuses: false,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
@@ -279,11 +279,11 @@ func TestClient_GetPullsWithStatuses(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: true,
-		DisableReviews:  true,
-		DisableCommits:  true,
-		DisableStatuses: false,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: false,
+		EnableReviews:  false,
+		EnableCommits:  false,
+		EnableStatuses: true,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
@@ -336,11 +336,11 @@ func TestClient_GetPullsWithAll(t *testing.T) {
 		RateLimit: math.MaxInt32,
 	})
 	opt := api.PullsOption{
-		DisableComments: false,
-		DisableReviews:  false,
-		DisableCommits:  false,
-		DisableStatuses: false,
-		Rules:           api.NewPullRequestRules([]string{}, 300),
+		EnableComments: true,
+		EnableReviews:  true,
+		EnableCommits:  true,
+		EnableStatuses: true,
+		Rules:          api.NewPullRequestRules([]string{}, 300),
 	}
 	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
 	if err != nil {
