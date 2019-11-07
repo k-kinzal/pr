@@ -29,7 +29,11 @@ func Merge(opt MergeOption) error {
 	client := api.NewClient(ctx, clientOption)
 
 	pullOption := api.PullsOption{
-		Rules: api.NewPullRequestRules(opt.Rules, opt.Limit),
+		EnableComments: opt.EnableComments,
+		EnableReviews:  opt.EnableReviews,
+		EnableCommits:  opt.EnableCommits,
+		EnableStatuses: opt.EnableStatuses,
+		Rules:          api.NewPullRequestRules(opt.Rules, opt.Limit),
 	}
 	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
 	if err != nil {

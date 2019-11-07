@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -82,34 +81,20 @@ func (r *PullRequestRules) Expression() string {
 }
 
 func (r *PullRequestRules) Apply(data []*PullRequest) ([]*PullRequest, error) {
-	out, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-	replaced := githubDateRegexp.ReplaceAllFunc(out, func(bytes []byte) []byte {
-		t, err := time.Parse(githubDateLayout, strings.Trim(string(bytes), "\""))
-		if err != nil {
-			return bytes
-		}
-		return []byte(fmt.Sprintf("%d", t.UTC().Unix()))
-	})
-
-	var v interface{}
-	if err := json.Unmarshal(replaced, &v); err != nil {
-		return nil, err
-	}
-
-	filtered, err := jmespath.Search(r.Expression(), v)
+	filtered, err := jmespath.Search(r.Expression(), data)
 	if err != nil {
 		return nil, xerrors.Errorf("jmespath: %s", err)
+	}
+	if filtered == nil {
+		return make([]*PullRequest, 0), nil
 	}
 
 	i := 0
 	var pulls []*PullRequest
 	for _, v := range filtered.([]interface{}) {
-		vv, _ := v.(map[string]interface{})
+		vv, _ := v.(*PullRequest)
 		for ; i < len(data); i++ {
-			if data[i].GetID() == int64(vv["id"].(float64)) {
+			if data[i].ID == vv.ID {
 				pulls = append(pulls, data[i])
 				break
 			}

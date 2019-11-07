@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v28/github"
-
 	"github.com/k-kinzal/pr/pkg/api"
 )
 
@@ -182,40 +180,27 @@ func TestPullRequestRules_Expression(t *testing.T) {
 	}
 }
 
-func ptri64(i int64) *int64 {
-	return &i
-}
-
-func ptrs(s string) *string {
-	return &s
-}
-
 func TestPullRequestRules_Apply(t *testing.T) {
-	now := time.Now()
+	now := api.Timestamp(time.Now().UTC().Unix())
 	pulls := []*api.PullRequest{
 		{
-			PullRequest: &github.PullRequest{
-				ID:        ptri64(1),
-				State:     ptrs("open"),
-				CreatedAt: &now,
-			},
-			Owner: ptrs("example"),
-			Repo:  ptrs("repo"),
-			Statuses: []*github.RepoStatus{
+			ID:        1,
+			State:     "open",
+			CreatedAt: now,
+			Statuses: []*api.RepoStatus{
 				{
-					State: ptrs("success"),
+					State: "success",
 				},
 				{
-					State: ptrs("pending"),
+					State: "pending",
 				},
 			},
+			Owner: "example",
+			Repo:  "repo",
 		},
 	}
 	r := []string{
 		"state == `\"open\"`",
-		"length(statuses) == `2`",
-		"length(statuses[?state == `\"success\"`]) == `1`",
-		"length(statuses[?state == `\"pending\"`]) == `1`",
 	}
 	rules := api.NewPullRequestRules(r, 100)
 	filtered, err := rules.Apply(pulls)
