@@ -23,7 +23,7 @@ func (t *Timestamp) UnmarshalJSON(data []byte) (err error) {
 	} else {
 		t.Time, err = time.Parse(`"`+time.RFC3339+`"`, str)
 	}
-	return nil
+	return err
 }
 
 func newTimestamp(t *time.Time) *Timestamp {

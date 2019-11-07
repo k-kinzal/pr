@@ -100,7 +100,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				// /repos/[owner]/[repo]/pulls/[pr number]/comments
 				s := strings.Split(res.Response().Request.URL.Path, "/")
 				number, _ := strconv.Atoi(s[len(s)-2])
-				index, _ := pullsIndexesByNumber[number]
+				index := pullsIndexesByNumber[number]
 				comments := make([]*PullRequestComment, len(body))
 				for i, comment := range body {
 					comments[i] = newPullRequestComment(comment)
@@ -110,7 +110,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				// /repos/[owner]/[repo]/pulls/[pr number]/reviews
 				s := strings.Split(res.Response().Request.URL.Path, "/")
 				number, _ := strconv.Atoi(s[len(s)-2])
-				index, _ := pullsIndexesByNumber[number]
+				index := pullsIndexesByNumber[number]
 				reviews := make([]*PullRequestReview, len(body))
 				for i, review := range body {
 					reviews[i] = newPullRequestReview(review)
@@ -120,7 +120,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				// /repos/[owner]/[repo]/pulls/[pr number]/commits
 				s := strings.Split(res.Response().Request.URL.Path, "/")
 				number, _ := strconv.Atoi(s[len(s)-2])
-				index, _ := pullsIndexesByNumber[number]
+				index := pullsIndexesByNumber[number]
 				commits := make([]*RepositoryCommit, len(body))
 				for i, commit := range body {
 					commits[i] = newRepositoryCommit(commit)
@@ -130,7 +130,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				// /repos/[owner]/[repo]/commits/[sha]/statuses
 				s := strings.Split(res.Response().Request.URL.Path, "/")
 				sha := s[len(s)-2]
-				index, _ := pullsIndexesBySHA[sha]
+				index := pullsIndexesBySHA[sha]
 				statuses := make([]*RepoStatus, len(body))
 				for i, status := range body {
 					statuses[i] = newRepoStatus(status)
