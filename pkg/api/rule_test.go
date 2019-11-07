@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v28/github"
-
 	"github.com/k-kinzal/pr/pkg/api"
 )
 
@@ -191,17 +189,13 @@ func ptrs(s string) *string {
 }
 
 func TestPullRequestRules_Apply(t *testing.T) {
-	now := time.Now()
+	now := &api.Timestamp{Time: time.Now()}
 	pulls := []*api.PullRequest{
 		{
-			PullRequest: &github.PullRequest{
-				ID:        ptri64(1),
-				State:     ptrs("open"),
-				CreatedAt: &now,
-			},
-			Owner: ptrs("example"),
-			Repo:  ptrs("repo"),
-			Statuses: []*github.RepoStatus{
+			ID:        ptri64(1),
+			State:     ptrs("open"),
+			CreatedAt: now,
+			Statuses: []*api.RepoStatus{
 				{
 					State: ptrs("success"),
 				},
@@ -209,6 +203,8 @@ func TestPullRequestRules_Apply(t *testing.T) {
 					State: ptrs("pending"),
 				},
 			},
+			Owner: ptrs("example"),
+			Repo:  ptrs("repo"),
 		},
 	}
 	r := []string{

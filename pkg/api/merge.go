@@ -44,13 +44,13 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 			buf.Reset()
 
 			state := "closed"
-			now := time.Now() //.Format("2006-01-02 15:04:05 -0700")
+			now := Timestamp{time.Now()} //.Format("2006-01-02 15:04:05 -0700")
 
 			o := &github.PullRequestOptions{
 				CommitTitle: commitTitle,
 				MergeMethod: opt.MergeMethod,
 			}
-			result, _, err := c.github.PullRequests.Merge(childCtx, pull.GetOwner(), pull.GetRepo(), pull.GetNumber(), commitMessage, o)
+			result, _, err := c.github.PullRequests.Merge(childCtx, *pull.Owner, *pull.Repo, *pull.Number, commitMessage, o)
 			if err != nil {
 				errCh <- err
 				return

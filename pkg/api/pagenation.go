@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"math"
-	"reflect"
 	"sync"
 
 	"github.com/google/go-github/v28/github"
@@ -12,6 +11,21 @@ import (
 const (
 	PerPage = 100
 )
+
+type Counter struct {
+	n int
+	m sync.Mutex
+}
+
+func (c *Counter) Increment() {
+	c.m.Lock()
+	c.n++
+	c.m.Unlock()
+}
+
+func (c *Counter) Num() int {
+	return c.n
+}
 
 type PagenationResult struct {
 	i interface{}
@@ -32,7 +46,9 @@ func (pr *PagenationResult) Error() error {
 }
 
 type Pagenation struct {
-	ch chan *PagenationResult
+	ch  chan *PagenationResult
+	wg  *sync.WaitGroup
+	cnt Counter
 }
 
 func (p *Pagenation) Request(ctx context.Context, callback func(opt *github.ListOptions) (interface{}, *github.Response, error)) {
@@ -40,42 +56,14 @@ func (p *Pagenation) Request(ctx context.Context, callback func(opt *github.List
 }
 
 func (p *Pagenation) RequestWithLimit(ctx context.Context, maxPage int, callback func(opt *github.ListOptions) (interface{}, *github.Response, error)) {
-	wg := new(sync.WaitGroup)
-
-	receiver := p.ch
-	sender := make(chan *PagenationResult)
-	p.ch = sender
-	if receiver != nil {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for v := range receiver {
-				sender <- v
-			}
-		}()
-	}
-
-	wg.Add(1)
+	p.cnt.Increment()
 	go func() {
-		defer wg.Done()
-		r := func(o *github.ListOptions) (interface{}, *github.Response, error) {
-			data, resp, err := callback(o)
-			switch reflect.TypeOf(data).Kind() {
-			case reflect.Slice, reflect.Array:
-				v := reflect.ValueOf(data)
-				for i := 0; i < v.Len(); i++ {
-					sender <- &PagenationResult{v.Index(i).Interface(), resp, err}
-				}
-			default:
-				sender <- &PagenationResult{data, resp, err}
-			}
-			return data, resp, err
-		}
 		o := &github.ListOptions{
 			Page:    0,
 			PerPage: PerPage,
 		}
-		_, resp, err := r(o)
+		data, resp, err := callback(o)
+		p.ch <- &PagenationResult{data, resp, err}
 		if err != nil {
 			return
 		}
@@ -85,21 +73,32 @@ func (p *Pagenation) RequestWithLimit(ctx context.Context, maxPage int, callback
 			lastPage = maxPage
 		}
 		for i := 1; i < lastPage; i++ {
-			wg.Add(1)
+			p.cnt.Increment()
 			go func(page int) {
-				defer wg.Done()
 				o.Page = page
-				r(o)
+				data, resp, err := callback(o)
+				p.ch <- &PagenationResult{data, resp, err}
 			}(i)
 		}
 	}()
 
-	go func() {
-		wg.Wait()
-		close(sender)
-	}()
 }
 
 func (p *Pagenation) Done() <-chan *PagenationResult {
 	return p.ch
+}
+
+func (p *Pagenation) RequestedNum() int {
+	return p.cnt.Num()
+}
+
+func NewPagenation() *Pagenation {
+	return &Pagenation{
+		ch: make(chan *PagenationResult),
+		wg: new(sync.WaitGroup),
+		cnt: Counter{
+			n: 0,
+			m: sync.Mutex{},
+		},
+	}
 }
