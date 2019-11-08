@@ -15,7 +15,7 @@ import (
 	"github.com/k-kinzal/pr/pkg/api"
 )
 
-func setup() {
+func setup(page int) {
 	responder := func(callback func(length int) (interface{}, error)) httpmock.Responder {
 		return func(req *http.Request) (*http.Response, error) {
 			data, _ := callback(api.PerPage)
@@ -24,12 +24,15 @@ func setup() {
 			resp.Header.Add("X-RateLimit-Limit", "5000")
 			resp.Header.Add("X-RateLimit-Remaining", "4999")
 			resp.Header.Add("X-RateLimit-Reset", fmt.Sprint(time.Now().Unix()))
-			resp.Header.Add("Link", gen.LinkHeader(req.URL, 3))
+			resp.Header.Add("Link", gen.LinkHeader(req.URL, page))
 			resp.Request = req
 			return resp, nil
 		}
 	}
+	gen.Reset()
 	httpmock.Activate()
+	httpmock.RegisterResponder("GET", "https://api.github.com/repos/octocat/Hello-World/pulls/1", responder(func(length int) (i interface{}, e error) { return gen.PullRequest() }))
+	httpmock.RegisterResponder("GET", "=~^https://api.github.com/search/issues", responder(func(length int) (interface{}, error) { return gen.IssuesSearchResult() }))
 	httpmock.RegisterResponder("GET", "https://api.github.com/repos/octocat/Hello-World/pulls", responder(func(length int) (interface{}, error) { return gen.PullRequests(length) }))
 	httpmock.RegisterResponder("GET", `=~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/comments`, responder(func(length int) (interface{}, error) { return gen.PullRequestComments(length) }))
 	httpmock.RegisterResponder("GET", `=~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/reviews`, responder(func(length int) (interface{}, error) { return gen.PullRequestReviews(length) }))
@@ -42,7 +45,7 @@ func teardown() {
 }
 
 func TestClient_GetPulls(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -99,7 +102,7 @@ func TestClient_GetPulls(t *testing.T) {
 }
 
 func TestClient_GetPullsWithComments(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -156,7 +159,7 @@ func TestClient_GetPullsWithComments(t *testing.T) {
 }
 
 func TestClient_GetPullsWithReviews(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -213,7 +216,7 @@ func TestClient_GetPullsWithReviews(t *testing.T) {
 }
 
 func TestClient_GetPullsWithCommits(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -270,7 +273,7 @@ func TestClient_GetPullsWithCommits(t *testing.T) {
 }
 
 func TestClient_GetPullsWithStatuses(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -327,7 +330,7 @@ func TestClient_GetPullsWithStatuses(t *testing.T) {
 }
 
 func TestClient_GetPullsWithAll(t *testing.T) {
-	setup()
+	setup(3)
 	defer teardown()
 
 	ctx := context.Background()
@@ -380,5 +383,104 @@ func TestClient_GetPullsWithAll(t *testing.T) {
 	}
 	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`] != 900 {
 		t.Fatalf("expect `900`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`], info)
+	}
+}
+
+func TestClient_GetPullsPassNumber(t *testing.T) {
+	setup(1)
+	defer teardown()
+
+	ctx := context.Background()
+	client := api.NewClient(ctx, &api.Options{
+		Token:     "xxxx",
+		RateLimit: math.MaxInt32,
+	})
+	opt := api.PullsOption{
+		EnableComments: true,
+		EnableReviews:  true,
+		EnableCommits:  true,
+		EnableStatuses: true,
+		Rules: api.NewPullRequestRules([]string{
+			"number == `1`",
+		}, 300),
+	}
+	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(pulls) != 1 {
+		t.Fatalf("pulls: expect `1`, but actual `%d`", len(pulls))
+	}
+
+	info := httpmock.GetCallCountInfo()
+	if info["GET https://api.github.com/repos/octocat/Hello-World/pulls/1"] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info["GET https://api.github.com/repos/octocat/Hello-World/pulls/1"], info)
+	}
+	if info["GET https://api.github.com/repos/octocat/Hello-World/pulls"] != 0 {
+		t.Fatalf("expect `0`, but actual `%d`: %#v", info["GET https://api.github.com/repos/octocat/Hello-World/pulls"], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/comments`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/comments`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/reviews`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/reviews`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/commits`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/commits`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`], info)
+	}
+}
+
+func TestClient_GetPullsPassSha(t *testing.T) {
+	setup(1)
+	defer teardown()
+
+	ctx := context.Background()
+	client := api.NewClient(ctx, &api.Options{
+		Token:     "xxxx",
+		RateLimit: math.MaxInt32,
+	})
+	opt := api.PullsOption{
+		EnableComments: true,
+		EnableReviews:  true,
+		EnableCommits:  true,
+		EnableStatuses: true,
+		Rules: api.NewPullRequestRules([]string{
+			"head.sha == `\"6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b\"`",
+		}, 300),
+	}
+	pulls, err := client.GetPulls(ctx, "octocat", "Hello-World", opt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(pulls) != 1 {
+		t.Fatalf("pulls: expect `1`, but actual `%d`", len(pulls))
+	}
+
+	info := httpmock.GetCallCountInfo()
+	if info["GET https://api.github.com/repos/octocat/Hello-World/pulls/1"] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info["GET https://api.github.com/repos/octocat/Hello-World/pulls/1"], info)
+	}
+	if info["GET =~^https://api.github.com/search/issues"] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info["GET =~^https://api.github.com/search/issues"], info)
+	}
+	if info["GET https://api.github.com/repos/octocat/Hello-World/pulls"] != 0 {
+		t.Fatalf("expect `0`, but actual `%d`: %#v", info["GET https://api.github.com/repos/octocat/Hello-World/pulls"], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/comments`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/comments`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/reviews`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/reviews`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/commits`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/pulls/\d+/commits`], info)
+	}
+	if info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`] != 1 {
+		t.Fatalf("expect `1`, but actual `%d`: %#v", info[`GET =~^https://api.github.com/repos/octocat/Hello-World/commits/[a-z0-9]+/statuses`], info)
 	}
 }

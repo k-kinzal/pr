@@ -118,5 +118,40 @@ $ pr show [owner]/[repo] -l
 
 `now()` returns the current unix time.
 
+### GitHub Action
+
+If you execute PR with [GitHub Action], the rules are automatically completed by event type.
+
+**Number completion**
+
+- pull_request
+- pull_request_review
+- pull_request_review_comment
+
+```
+number == `[Pull Request Number]`
+```
+
+**Head branch completion**
+- create
+- deployment
+- deployment_status
+- push
+- release
+
+```
+head.ref == `"[Branch Name]"`
+```
+
+**SHA completion**
+- page_build
+- status
+
+```
+head.sha == `\"[SHA]\"`
+```
+
+Please see the [event trigger](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows) for details.
+
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fk-kinzal%2Fpr?ref=badge_large)

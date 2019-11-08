@@ -50,7 +50,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 				CommitTitle: commitTitle,
 				MergeMethod: opt.MergeMethod,
 			}
-			result, _, err := c.github.PullRequests.Merge(childCtx, pull.Owner, pull.Repo, pull.Number, commitMessage, o)
+			result, _, err := c.github.PullRequests.Merge(childCtx, pull.Owner, pull.Repo, int(pull.Number), commitMessage, o)
 			if err != nil {
 				errCh <- err
 				return
@@ -65,7 +65,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt MergeOptio
 			p.UpdatedAt = now
 			p.ClosedAt = now
 			p.MergedAt = now
-			p.MergeCommitSHA = *result.SHA
+			p.MergeCommitSha = *result.SHA
 
 			ch <- &p
 		}(pull)

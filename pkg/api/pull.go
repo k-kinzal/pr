@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -22,11 +23,20 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 	defer cancel()
 
 	if num := opt.Rules.GetNumber(); num > 0 {
-		go func() {
-			pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
-				return c.github.PullRequests.Get(childCtx, owner, repo, num)
-			})
-		}()
+		pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+			return c.github.PullRequests.Get(childCtx, owner, repo, num)
+		})
+	} else if sha := opt.Rules.GetSHA(); sha != "" {
+		pagenation.RequestWithLimit(childCtx, opt.Rules.GetLimit()/PerPage, func(listOptions *github.ListOptions) (interface{}, *github.Response, error) {
+			query := fmt.Sprintf("is:pr repo:%s/%s %s", owner, repo, sha)
+			searchOptions := &github.SearchOptions{
+				Sort:        "created",
+				Order:       "desc",
+				ListOptions: *listOptions,
+			}
+			return c.github.Search.Issues(childCtx, query, searchOptions)
+		})
+
 	} else {
 		pagenation.RequestWithLimit(childCtx, opt.Rules.GetLimit()/PerPage, func(listOptions *github.ListOptions) (interface{}, *github.Response, error) {
 			pullOptions := &github.PullRequestListOptions{
@@ -38,7 +48,6 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				ListOptions: *listOptions,
 			}
 			return c.github.PullRequests.List(childCtx, owner, repo, pullOptions)
-
 		})
 	}
 
@@ -57,6 +66,47 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				return nil, err
 			}
 			switch body := res.Interface().(type) {
+			case *github.IssuesSearchResult:
+				for _, v := range body.Issues {
+					func(issue github.Issue) {
+						pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+							return c.github.PullRequests.Get(childCtx, owner, repo, issue.GetNumber())
+						})
+					}(v)
+				}
+			case *github.PullRequest:
+				index := len(pulls)
+				pull := newPullRequest(owner, repo, body, nil, nil, nil, nil)
+				pullsIndexesByNumber[body.GetNumber()] = index
+				pullsIndexesBySHA[body.GetHead().GetSHA()] = index
+				pulls = append(pulls, pull)
+
+				if opt.EnableComments {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						listCommentOptions := &github.PullRequestListCommentsOptions{
+							Sort:        "created",
+							Direction:   "desc",
+							ListOptions: *opt,
+						}
+						return c.github.PullRequests.ListComments(childCtx, owner, repo, body.GetNumber(), listCommentOptions)
+					})
+				}
+				if opt.EnableReviews {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.PullRequests.ListReviews(childCtx, owner, repo, body.GetNumber(), opt)
+					})
+				}
+				if opt.EnableCommits {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.PullRequests.ListCommits(childCtx, owner, repo, body.GetNumber(), opt)
+					})
+				}
+				if opt.EnableStatuses {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						return c.github.Repositories.ListStatuses(childCtx, owner, repo, body.GetHead().GetSHA(), opt)
+					})
+				}
+
 			case []*github.PullRequest:
 				values := make([]*PullRequest, len(body))
 				for i, v := range body {
@@ -68,7 +118,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				pulls = append(pulls, values...)
 
 				for _, v := range body {
-					go func(pull *github.PullRequest) {
+					func(pull *github.PullRequest) {
 						if opt.EnableComments {
 							pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
 								listCommentOptions := &github.PullRequestListCommentsOptions{
