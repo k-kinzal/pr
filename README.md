@@ -140,7 +140,15 @@ number == `[Pull Request Number]`
 - release
 
 ```
-head == `"[Branch Name]"`
+head.ref == `"[Branch Name]"`
+```
+
+**SHA completion**
+- page_build
+- status
+
+```
+head.sha == `\"[SHA]\"`
 ```
 
 Please see the [event trigger](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows) for details.

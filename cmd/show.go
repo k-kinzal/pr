@@ -8,6 +8,8 @@ import (
 
 	"github.com/k-kinzal/pr/pkg/pr"
 	"github.com/spf13/cobra"
+
+	ev "gopkg.in/go-playground/webhooks.v5/github"
 )
 
 var (
@@ -38,41 +40,42 @@ func ShowRun(cmd *cobra.Command, args []string) error {
 	}
 
 	if pullNumber := action.PullNumber(); pullNumber != nil {
-		opt.Rules = append(opt.Rules, fmt.Sprintf("number = `%d`", *pullNumber))
+		opt.Rules = append(opt.Rules, fmt.Sprintf("number == `%d`", *pullNumber))
 	}
 
 	if branchName := action.BranchName(); branchName != nil {
-		opt.Rules = append(opt.Rules, fmt.Sprintf("head = `\"%s\"`", *branchName))
+		opt.Rules = append(opt.Rules, fmt.Sprintf("head.ref == `\"%s\"`", *branchName))
 	}
 
-	// Do nothing
-	//switch payload := action.Payload.(type) {
-	//case ev.CheckRunPayload:
-	//case ev.CheckSuitePayload:
-	//case ev.CreatePayload:
-	//case ev.DeletePayload:
-	//case ev.DeploymentPayload:
-	//case ev.DeploymentStatusPayload:
-	//case ev.ForkPayload:
-	//case ev.GollumPayload:
-	//case ev.IssueCommentPayload:
-	//case ev.IssuesPayload:
-	//case ev.LabelPayload:
-	//case ev.MemberPayload:
-	//case ev.MilestonePayload:
-	//case ev.PageBuildPayload:
-	//case ev.ProjectPayload:
-	//case ev.ProjectCardPayload:
-	//case ev.ProjectColumnPayload:
-	//case ev.PublicPayload:
-	//case ev.PullRequestPayload:
-	//case ev.PullRequestReviewPayload:
-	//case ev.PullRequestReviewCommentPayload:
-	//case ev.PushPayload:
-	//case ev.ReleasePayload:
-	//case ev.StatusPayload:
-	//case ev.WatchPayload:
-	//}
+	switch action.Payload.(type) {
+	case ev.CheckRunPayload:
+	case ev.CheckSuitePayload:
+	case ev.CreatePayload:
+	case ev.DeletePayload:
+	case ev.DeploymentPayload:
+	case ev.DeploymentStatusPayload:
+	case ev.ForkPayload:
+	case ev.GollumPayload:
+	case ev.IssueCommentPayload:
+	case ev.IssuesPayload:
+	case ev.LabelPayload:
+	case ev.MemberPayload:
+	case ev.MilestonePayload:
+	case ev.PageBuildPayload:
+		opt.Rules = append(opt.Rules, fmt.Sprintf("head.sha == `\"%s\"`", action.SHA))
+	case ev.ProjectPayload:
+	case ev.ProjectCardPayload:
+	case ev.ProjectColumnPayload:
+	case ev.PublicPayload:
+	case ev.PullRequestPayload:
+	case ev.PullRequestReviewPayload:
+	case ev.PullRequestReviewCommentPayload:
+	case ev.PushPayload:
+	case ev.ReleasePayload:
+	case ev.StatusPayload:
+		opt.Rules = append(opt.Rules, fmt.Sprintf("head.sha == `\"%s\"`", action.SHA))
+	case ev.WatchPayload:
+	}
 
 	if err := pr.Show(opt); err != nil {
 		switch err.(type) {
