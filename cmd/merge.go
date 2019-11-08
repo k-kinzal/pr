@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/k-kinzal/pr/pkg/action"
+
 	"github.com/k-kinzal/pr/pkg/pr"
 	"github.com/spf13/cobra"
 )
@@ -19,31 +21,72 @@ var (
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			mergeOption.Option = globalOption
-			if b, _ := cmd.Flags().GetBool("with-all"); b {
-				showOption.EnableComments = true
-				showOption.EnableReviews = true
-				showOption.EnableCommits = true
-				showOption.EnableStatuses = true
-			}
-			if err := pr.Merge(mergeOption); err != nil {
-				switch err.(type) {
-				case *pr.NoMatchError:
-					if exitCode {
-						os.Exit(127)
-					}
-					return nil
-				}
-				return err
-			}
-
-			return nil
-		},
+		RunE:          MergeRun,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
 )
+
+func MergeRun(cmd *cobra.Command, args []string) error {
+	opt := mergeOption
+	opt.Option = globalOption
+	if b, _ := cmd.Flags().GetBool("with-all"); b {
+		opt.EnableComments = true
+		opt.EnableReviews = true
+		opt.EnableCommits = true
+		opt.EnableStatuses = true
+	}
+
+	if pullNumber := action.PullNumber(); pullNumber != nil {
+		opt.Rules = append(opt.Rules, fmt.Sprintf("number = `%d`", *pullNumber))
+	}
+
+	if branchName := action.BranchName(); branchName != nil {
+		opt.Rules = append(opt.Rules, fmt.Sprintf("head = `\"%s\"`", *branchName))
+	}
+
+	// Do nothing
+	//switch payload := action.Payload.(type) {
+	//case ev.CheckRunPayload:
+	//case ev.CheckSuitePayload:
+	//case ev.CreatePayload:
+	//case ev.DeletePayload:
+	//case ev.DeploymentPayload:
+	//case ev.DeploymentStatusPayload:
+	//case ev.ForkPayload:
+	//case ev.GollumPayload:
+	//case ev.IssueCommentPayload:
+	//case ev.IssuesPayload:
+	//case ev.LabelPayload:
+	//case ev.MemberPayload:
+	//case ev.MilestonePayload:
+	//case ev.PageBuildPayload:
+	//case ev.ProjectPayload:
+	//case ev.ProjectCardPayload:
+	//case ev.ProjectColumnPayload:
+	//case ev.PublicPayload:
+	//case ev.PullRequestPayload:
+	//case ev.PullRequestReviewPayload:
+	//case ev.PullRequestReviewCommentPayload:
+	//case ev.PushPayload:
+	//case ev.ReleasePayload:
+	//case ev.StatusPayload:
+	//case ev.WatchPayload:
+	//}
+
+	if err := pr.Merge(opt); err != nil {
+		switch err.(type) {
+		case *pr.NoMatchError:
+			if exitCode {
+				os.Exit(127)
+			}
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
 
 func init() {
 	mergeCmd.Flags().IntVar(&mergeOption.Limit, "limit", 100, "limit the number of merge")

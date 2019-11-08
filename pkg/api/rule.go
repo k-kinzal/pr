@@ -15,14 +15,12 @@ import (
 var (
 	Now               = time.Now().UTC().Unix()
 	dateLayout        = "2006-01-02T15:04:05Z"
-	githubDateLayout  = time.RFC3339
 	numberRegexp      = regexp.MustCompile("number\\s*[=!<>]=?\\s*`([0-9]*?)`")
 	stateRegexp       = regexp.MustCompile("state\\s*[=!]=\\s*`\"(.*?)\"`")
 	headRegexp        = regexp.MustCompile("head\\s*[=!]=\\s*`\"(.*?)\"`")
 	baseRegexp        = regexp.MustCompile("base\\s*[=!]=\\s*`\"(.*?)\"`")
 	dateRegexp        = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`)
 	timeRegexp        = regexp.MustCompile(`"\d{2}:\d{2}:\d{2}"`)
-	githubDateRegexp  = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}"`)
 	nowFunctionRegexp = regexp.MustCompile(`now\(\)`)
 )
 

@@ -10,4 +10,5 @@ require (
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+	gopkg.in/go-playground/webhooks.v5 v5.13.0
 )
