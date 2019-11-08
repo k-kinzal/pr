@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-github/v28/github"
 )
 
-type Timestamp int64
+type Timestamp float64
 
 func newTimestamp(t *time.Time) Timestamp {
 	if t == nil {
@@ -16,17 +16,17 @@ func newTimestamp(t *time.Time) Timestamp {
 }
 
 type Team struct {
-	ID              int64  `json:"id"`
-	NodeID          string `json:"node_id"`
-	URL             string `json:"url"`
-	Name            string `json:"name"`
-	Slug            string `json:"slug"`
-	Description     string `json:"description"`
-	Privacy         string `json:"privacy"`
-	Permission      string `json:"permission"`
-	MembersURL      string `json:"members_url"`
-	RepositoriesURL string `json:"repositories_url"`
-	Parent          *Team  `json:"parent,omitempty"`
+	Id              float64 `json:"id"`
+	NodeId          string  `json:"node_id"`
+	Url             string  `json:"url"`
+	Name            string  `json:"name"`
+	Slug            string  `json:"slug"`
+	Description     string  `json:"description"`
+	Privacy         string  `json:"privacy"`
+	Permission      string  `json:"permission"`
+	MembersUrl      string  `json:"members_url"`
+	RepositoriesUrl string  `json:"repositories_url"`
+	Parent          *Team   `json:"parent,omitempty"`
 }
 
 func newTeam(team *github.Team) *Team {
@@ -34,40 +34,40 @@ func newTeam(team *github.Team) *Team {
 		return nil
 	}
 	t := &Team{}
-	t.ID = team.GetID()
-	t.NodeID = team.GetNodeID()
-	t.URL = team.GetURL()
+	t.Id = float64(team.GetID())
+	t.NodeId = team.GetNodeID()
+	t.Url = team.GetURL()
 	//t.HTMLURL = team.GetHTMLURL() // go-github not support
 	t.Name = team.GetName()
 	t.Slug = team.GetSlug()
 	t.Description = team.GetDescription()
 	t.Privacy = team.GetPrivacy()
 	t.Permission = team.GetPermission()
-	t.MembersURL = team.GetMembersURL()
-	t.RepositoriesURL = team.GetRepositoriesURL()
+	t.MembersUrl = team.GetMembersURL()
+	t.RepositoriesUrl = team.GetRepositoriesURL()
 	t.Parent = newTeam(team.GetParent())
 	return t
 }
 
 type User struct {
-	Login             string `json:"login"`
-	ID                int64  `json:"id"`
-	NodeID            string `json:"node_id"`
-	AvatarURL         string `json:"avatar_url"`
-	GravatarID        string `json:"gravatar_id"`
-	URL               string `json:"url"`
-	HTMLURL           string `json:"html_url"`
-	FollowersURL      string `json:"followers_url"`
-	FollowingURL      string `json:"following_url"`
-	GistsURL          string `json:"gists_url"`
-	StarredURL        string `json:"starred_url"`
-	SubscriptionsURL  string `json:"subscriptions_url"`
-	OrganizationsURL  string `json:"organizations_url"`
-	ReposURL          string `json:"repos_url"`
-	EventsURL         string `json:"events_url"`
-	ReceivedEventsURL string `json:"received_events_url"`
-	Type              string `json:"type"`
-	SiteAdmin         bool   `json:"site_admin"`
+	Login             string  `json:"login"`
+	Id                float64 `json:"id"`
+	NodeId            string  `json:"node_id"`
+	AvatarUrl         string  `json:"avatar_url"`
+	GravatarId        string  `json:"gravatar_id"`
+	Url               string  `json:"url"`
+	HtmlUrl           string  `json:"html_url"`
+	FollowersUrl      string  `json:"followers_url"`
+	FollowingUrl      string  `json:"following_url"`
+	GistsUrl          string  `json:"gists_url"`
+	StarredUrl        string  `json:"starred_url"`
+	SubscriptionsUrl  string  `json:"subscriptions_url"`
+	OrganizationsUrl  string  `json:"organizations_url"`
+	ReposUrl          string  `json:"repos_url"`
+	EventsUrl         string  `json:"events_url"`
+	ReceivedEventsUrl string  `json:"received_events_url"`
+	Type              string  `json:"type"`
+	SiteAdmin         bool    `json:"site_admin"`
 }
 
 func newUser(user *github.User) *User {
@@ -76,86 +76,86 @@ func newUser(user *github.User) *User {
 	}
 	u := &User{}
 	u.Login = user.GetLogin()
-	u.ID = user.GetID()
-	u.NodeID = user.GetNodeID()
-	u.AvatarURL = user.GetAvatarURL()
-	u.GravatarID = user.GetGravatarID()
-	u.URL = user.GetURL()
-	u.HTMLURL = user.GetHTMLURL()
-	u.FollowersURL = user.GetFollowersURL()
-	u.FollowingURL = user.GetFollowingURL()
-	u.GistsURL = user.GetGistsURL()
-	u.StarredURL = user.GetStarredURL()
-	u.SubscriptionsURL = user.GetSubscriptionsURL()
-	u.OrganizationsURL = user.GetOrganizationsURL()
-	u.ReposURL = user.GetReposURL()
-	u.EventsURL = user.GetEventsURL()
-	u.ReceivedEventsURL = user.GetReceivedEventsURL()
+	u.Id = float64(user.GetID())
+	u.NodeId = user.GetNodeID()
+	u.AvatarUrl = user.GetAvatarURL()
+	u.GravatarId = user.GetGravatarID()
+	u.Url = user.GetURL()
+	u.HtmlUrl = user.GetHTMLURL()
+	u.FollowersUrl = user.GetFollowersURL()
+	u.FollowingUrl = user.GetFollowingURL()
+	u.GistsUrl = user.GetGistsURL()
+	u.StarredUrl = user.GetStarredURL()
+	u.SubscriptionsUrl = user.GetSubscriptionsURL()
+	u.OrganizationsUrl = user.GetOrganizationsURL()
+	u.ReposUrl = user.GetReposURL()
+	u.EventsUrl = user.GetEventsURL()
+	u.ReceivedEventsUrl = user.GetReceivedEventsURL()
 	u.Type = user.GetType()
 	u.SiteAdmin = user.GetSiteAdmin()
 	return u
 }
 
 type Repository struct {
-	ID                 int64           `json:"id"`
-	NodeID             string          `json:"node_id"`
+	Id                 float64         `json:"id"`
+	NodeId             string          `json:"node_id"`
 	Name               string          `json:"name"`
 	FullName           string          `json:"full_name"`
 	Owner              *User           `json:"owner,omitempty"`
 	Private            bool            `json:"private"`
-	HTMLURL            string          `json:"html_url"`
+	HtmlUrl            string          `json:"html_url"`
 	Description        string          `json:"description"`
 	Fork               bool            `json:"fork"`
-	URL                string          `json:"url"`
-	ArchiveURL         string          `json:"archive_url"`
-	AssigneesURL       string          `json:"assignees_url"`
-	BlobsURL           string          `json:"blobs_url"`
-	BranchesURL        string          `json:"branches_url"`
-	CollaboratorsURL   string          `json:"collaborators_url"`
-	CommentsURL        string          `json:"comments_url"`
-	CommitsURL         string          `json:"commits_url"`
-	CompareURL         string          `json:"compare_url"`
-	ContentsURL        string          `json:"contents_url"`
-	ContributorsURL    string          `json:"contributors_url"`
-	DeploymentsURL     string          `json:"deployments_url"`
-	DownloadsURL       string          `json:"downloads_url"`
-	EventsURL          string          `json:"events_url"`
-	ForksURL           string          `json:"forks_url"`
-	GitCommitsURL      string          `json:"git_commits_url"`
-	GitRefsURL         string          `json:"git_refs_url"`
-	GitTagsURL         string          `json:"git_tags_url"`
-	GitURL             string          `json:"git_url"`
-	IssueCommentURL    string          `json:"issue_comment_url"`
-	IssueEventsURL     string          `json:"issue_events_url"`
-	IssuesURL          string          `json:"issues_url"`
-	KeysURL            string          `json:"keys_url"`
-	LabelsURL          string          `json:"labels_url"`
-	LanguagesURL       string          `json:"languages_url"`
-	MergesURL          string          `json:"merges_url"`
-	MilestonesURL      string          `json:"milestones_url"`
-	NotificationsURL   string          `json:"notifications_url"`
-	PullsURL           string          `json:"pulls_url"`
-	ReleasesURL        string          `json:"releases_url"`
-	SSHURL             string          `json:"ssh_url"`
-	StargazersURL      string          `json:"stargazers_url"`
-	StatusesURL        string          `json:"statuses_url"`
-	SubscribersURL     string          `json:"subscribers_url"`
-	SubscriptionURL    string          `json:"subscription_url"`
-	TagsURL            string          `json:"tags_url"`
-	TeamsURL           string          `json:"teams_url"`
-	TreesURL           string          `json:"trees_url"`
-	CloneURL           string          `json:"clone_url"`
-	MirrorURL          string          `json:"mirror_url"`
-	HooksURL           string          `json:"hooks_url"`
-	SVNURL             string          `json:"svn_url"`
+	Url                string          `json:"url"`
+	ArchiveUrl         string          `json:"archive_url"`
+	AssigneesUrl       string          `json:"assignees_url"`
+	BlobsUrl           string          `json:"blobs_url"`
+	BranchesUrl        string          `json:"branches_url"`
+	CollaboratorsUrl   string          `json:"collaborators_url"`
+	CommentsUrl        string          `json:"comments_url"`
+	CommitsUrl         string          `json:"commits_url"`
+	CompareUrl         string          `json:"compare_url"`
+	ContentsUrl        string          `json:"contents_url"`
+	ContributorsUrl    string          `json:"contributors_url"`
+	DeploymentsUrl     string          `json:"deployments_url"`
+	DownloadsUrl       string          `json:"downloads_url"`
+	EventsUrl          string          `json:"events_url"`
+	ForksUrl           string          `json:"forks_url"`
+	GitCommitsUrl      string          `json:"git_commits_url"`
+	GitRefsUrl         string          `json:"git_refs_url"`
+	GitTagsUrl         string          `json:"git_tags_url"`
+	GitUrl             string          `json:"git_url"`
+	IssueCommentUrl    string          `json:"issue_comment_url"`
+	IssueEventsUrl     string          `json:"issue_events_url"`
+	IssuesUrl          string          `json:"issues_url"`
+	KeysUrl            string          `json:"keys_url"`
+	LabelsUrl          string          `json:"labels_url"`
+	LanguagesUrl       string          `json:"languages_url"`
+	MergesUrl          string          `json:"merges_url"`
+	MilestonesUrl      string          `json:"milestones_url"`
+	NotificationsUrl   string          `json:"notifications_url"`
+	PullsUrl           string          `json:"pulls_url"`
+	ReleasesUrl        string          `json:"releases_url"`
+	SshUrl             string          `json:"ssh_url"`
+	StargazersUrl      string          `json:"stargazers_url"`
+	StatusesUrl        string          `json:"statuses_url"`
+	SubscribersUrl     string          `json:"subscribers_url"`
+	SubscriptionUrl    string          `json:"subscription_url"`
+	TagsUrl            string          `json:"tags_url"`
+	TeamsUrl           string          `json:"teams_url"`
+	TreesUrl           string          `json:"trees_url"`
+	CloneUrl           string          `json:"clone_url"`
+	MirrorUrl          string          `json:"mirror_url"`
+	HooksUrl           string          `json:"hooks_url"`
+	SvnUrl             string          `json:"svn_url"`
 	Homepage           string          `json:"homepage"`
 	Language           string          `json:"language"`
-	ForksCount         int             `json:"forks_count"`
-	StargazersCount    int             `json:"stargazers_count"`
-	WatchersCount      int             `json:"watchers_count"`
-	Size               int             `json:"size"`
+	ForksCount         float64         `json:"forks_count"`
+	StargazersCount    float64         `json:"stargazers_count"`
+	WatchersCount      float64         `json:"watchers_count"`
+	Size               float64         `json:"size"`
 	DefaultBranch      string          `json:"default_branch"`
-	OpenIssuesCount    int             `json:"open_issues_count"`
+	OpenIssuesCount    float64         `json:"open_issues_count"`
 	IsTemplate         bool            `json:"is_template"`
 	HasIssues          bool            `json:"has_issues"`
 	HasProjects        bool            `json:"has_projects"`
@@ -172,8 +172,8 @@ type Repository struct {
 	TemplateRepository *Repository     `json:"template_repository,omitempty"`
 	AllowSquashMerge   bool            `json:"allow_squash_merge"`
 	AllowMergeCommit   bool            `json:"allow_merge_commit"`
-	SubscribersCount   int             `json:"subscribers_count"`
-	NetworkCount       int             `json:"network_count"`
+	SubscribersCount   float64         `json:"subscribers_count"`
+	NetworkCount       float64         `json:"network_count"`
 }
 
 func newRepository(repo *github.Repository) *Repository {
@@ -181,65 +181,65 @@ func newRepository(repo *github.Repository) *Repository {
 		return nil
 	}
 	r := &Repository{}
-	r.ID = repo.GetID()
-	r.NodeID = repo.GetNodeID()
+	r.Id = float64(repo.GetID())
+	r.NodeId = repo.GetNodeID()
 	r.Name = repo.GetName()
 	r.FullName = repo.GetFullName()
 	r.Owner = newUser(repo.GetOwner())
 	r.Private = repo.GetPrivate()
-	r.HTMLURL = repo.GetHTMLURL()
+	r.HtmlUrl = repo.GetHTMLURL()
 	r.Description = repo.GetDescription()
 	r.Fork = repo.GetFork()
-	r.URL = repo.GetURL()
-	r.ArchiveURL = repo.GetArchiveURL()
-	r.AssigneesURL = repo.GetAssigneesURL()
-	r.BlobsURL = repo.GetBlobsURL()
-	r.BranchesURL = repo.GetBranchesURL()
-	r.CollaboratorsURL = repo.GetCollaboratorsURL()
-	r.CommentsURL = repo.GetCommentsURL()
-	r.CommitsURL = repo.GetCommitsURL()
-	r.CompareURL = repo.GetCompareURL()
-	r.ContentsURL = repo.GetContentsURL()
-	r.ContributorsURL = repo.GetContributorsURL()
-	r.DeploymentsURL = repo.GetDeploymentsURL()
-	r.DownloadsURL = repo.GetDownloadsURL()
-	r.EventsURL = repo.GetEventsURL()
-	r.ForksURL = repo.GetForksURL()
-	r.GitCommitsURL = repo.GetGitCommitsURL()
-	r.GitRefsURL = repo.GetGitRefsURL()
-	r.GitTagsURL = repo.GetGitTagsURL()
-	r.GitURL = repo.GetGitURL()
-	r.IssueCommentURL = repo.GetIssueCommentURL()
-	r.IssueEventsURL = repo.GetIssueEventsURL()
-	r.IssuesURL = repo.GetIssuesURL()
-	r.KeysURL = repo.GetKeysURL()
-	r.LabelsURL = repo.GetLabelsURL()
-	r.LanguagesURL = repo.GetLanguagesURL()
-	r.MergesURL = repo.GetMergesURL()
-	r.MilestonesURL = repo.GetMilestonesURL()
-	r.NotificationsURL = repo.GetNotificationsURL()
-	r.PullsURL = repo.GetPullsURL()
-	r.ReleasesURL = repo.GetReleasesURL()
-	r.SSHURL = repo.GetSSHURL()
-	r.StargazersURL = repo.GetStargazersURL()
-	r.StatusesURL = repo.GetStatusesURL()
-	r.SubscribersURL = repo.GetSubscribersURL()
-	r.SubscriptionURL = repo.GetSubscriptionURL()
-	r.TagsURL = repo.GetTagsURL()
-	r.TeamsURL = repo.GetTeamsURL()
-	r.TreesURL = repo.GetTreesURL()
-	r.CloneURL = repo.GetCloneURL()
-	r.MirrorURL = repo.GetMirrorURL()
-	r.HooksURL = repo.GetHooksURL()
-	r.SVNURL = repo.GetSVNURL()
+	r.Url = repo.GetURL()
+	r.ArchiveUrl = repo.GetArchiveURL()
+	r.AssigneesUrl = repo.GetAssigneesURL()
+	r.BlobsUrl = repo.GetBlobsURL()
+	r.BranchesUrl = repo.GetBranchesURL()
+	r.CollaboratorsUrl = repo.GetCollaboratorsURL()
+	r.CommentsUrl = repo.GetCommentsURL()
+	r.CommitsUrl = repo.GetCommitsURL()
+	r.CompareUrl = repo.GetCompareURL()
+	r.ContentsUrl = repo.GetContentsURL()
+	r.ContributorsUrl = repo.GetContributorsURL()
+	r.DeploymentsUrl = repo.GetDeploymentsURL()
+	r.DownloadsUrl = repo.GetDownloadsURL()
+	r.EventsUrl = repo.GetEventsURL()
+	r.ForksUrl = repo.GetForksURL()
+	r.GitCommitsUrl = repo.GetGitCommitsURL()
+	r.GitRefsUrl = repo.GetGitRefsURL()
+	r.GitTagsUrl = repo.GetGitTagsURL()
+	r.GitUrl = repo.GetGitURL()
+	r.IssueCommentUrl = repo.GetIssueCommentURL()
+	r.IssueEventsUrl = repo.GetIssueEventsURL()
+	r.IssuesUrl = repo.GetIssuesURL()
+	r.KeysUrl = repo.GetKeysURL()
+	r.LabelsUrl = repo.GetLabelsURL()
+	r.LanguagesUrl = repo.GetLanguagesURL()
+	r.MergesUrl = repo.GetMergesURL()
+	r.MilestonesUrl = repo.GetMilestonesURL()
+	r.NotificationsUrl = repo.GetNotificationsURL()
+	r.PullsUrl = repo.GetPullsURL()
+	r.ReleasesUrl = repo.GetReleasesURL()
+	r.SshUrl = repo.GetSSHURL()
+	r.StargazersUrl = repo.GetStargazersURL()
+	r.StatusesUrl = repo.GetStatusesURL()
+	r.SubscribersUrl = repo.GetSubscribersURL()
+	r.SubscriptionUrl = repo.GetSubscriptionURL()
+	r.TagsUrl = repo.GetTagsURL()
+	r.TeamsUrl = repo.GetTeamsURL()
+	r.TreesUrl = repo.GetTreesURL()
+	r.CloneUrl = repo.GetCloneURL()
+	r.MirrorUrl = repo.GetMirrorURL()
+	r.HooksUrl = repo.GetHooksURL()
+	r.SvnUrl = repo.GetSVNURL()
 	r.Homepage = repo.GetHomepage()
 	r.Language = repo.GetLanguage()
-	r.ForksCount = repo.GetForksCount()
-	r.StargazersCount = repo.GetStargazersCount()
-	r.WatchersCount = repo.GetWatchersCount()
-	r.Size = repo.GetSize()
+	r.ForksCount = float64(repo.GetForksCount())
+	r.StargazersCount = float64(repo.GetStargazersCount())
+	r.WatchersCount = float64(repo.GetWatchersCount())
+	r.Size = float64(repo.GetSize())
 	r.DefaultBranch = repo.GetDefaultBranch()
-	r.OpenIssuesCount = repo.GetOpenIssuesCount()
+	r.OpenIssuesCount = float64(repo.GetOpenIssuesCount())
 	r.IsTemplate = repo.GetIsTemplate()
 	//r.Topics = repo.GetTopics() // go-github not support
 	r.HasIssues = repo.GetHasIssues()
@@ -260,15 +260,15 @@ func newRepository(repo *github.Repository) *Repository {
 	r.TemplateRepository = newRepository(repo.GetTemplateRepository())
 	r.AllowSquashMerge = repo.GetAllowSquashMerge()
 	r.AllowMergeCommit = repo.GetAllowMergeCommit()
-	r.SubscribersCount = repo.GetSubscribersCount()
-	r.NetworkCount = repo.GetNetworkCount()
+	r.SubscribersCount = float64(repo.GetSubscribersCount())
+	r.NetworkCount = float64(repo.GetNetworkCount())
 	return r
 }
 
 type PullRequestBranch struct {
 	Label string      `json:"label"`
 	Ref   string      `json:"ref"`
-	SHA   string      `json:"sha"`
+	Sha   string      `json:"sha"`
 	User  *User       `json:"user,omitempty"`
 	Repo  *Repository `json:"repo,omitempty"`
 }
@@ -280,20 +280,20 @@ func newPullRequestBranch(branch *github.PullRequestBranch) *PullRequestBranch {
 	b := &PullRequestBranch{}
 	b.Label = branch.GetLabel()
 	b.Ref = branch.GetRef()
-	b.SHA = branch.GetSHA()
+	b.Sha = branch.GetSHA()
 	b.User = newUser(branch.GetUser())
 	b.Repo = newRepository(branch.GetRepo())
 	return b
 }
 
 type Label struct {
-	ID          int64  `json:"id"`
-	NodeID      string `json:"node_id"`
-	URL         string `json:"url"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Color       string `json:"color"`
-	Default     bool   `json:"default"`
+	Id          float64 `json:"id"`
+	NodeId      string  `json:"node_id"`
+	Url         string  `json:"url"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Color       string  `json:"color"`
+	Default     bool    `json:"default"`
 }
 
 func newLabel(label *github.Label) *Label {
@@ -301,9 +301,9 @@ func newLabel(label *github.Label) *Label {
 		return nil
 	}
 	l := &Label{}
-	l.ID = label.GetID()
-	l.NodeID = label.GetNodeID()
-	l.URL = label.GetURL()
+	l.Id = float64(label.GetID())
+	l.NodeId = label.GetNodeID()
+	l.Url = label.GetURL()
 	l.Name = label.GetName()
 	l.Description = label.GetDescription()
 	l.Color = label.GetColor()
@@ -312,18 +312,18 @@ func newLabel(label *github.Label) *Label {
 }
 
 type Milestone struct {
-	URL          string    `json:"url"`
-	HTMLURL      string    `json:"html_url"`
-	LabelsURL    string    `json:"labels_url"`
-	ID           int64     `json:"id"`
-	NodeID       string    `json:"node_id"`
-	Number       int       `json:"number"`
+	Url          string    `json:"url"`
+	HtmlUrl      string    `json:"html_url"`
+	LabelsUrl    string    `json:"labels_url"`
+	Id           float64   `json:"id"`
+	NodeId       string    `json:"node_id"`
+	Number       float64   `json:"number"`
 	State        string    `json:"state"`
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
 	Creator      *User     `json:"creator,omitempty"`
-	OpenIssues   int       `json:"open_issues"`
-	ClosedIssues int       `json:"closed_issues"`
+	OpenIssues   float64   `json:"open_issues"`
+	ClosedIssues float64   `json:"closed_issues"`
 	CreatedAt    Timestamp `json:"created_at,omitempty"`
 	UpdatedAt    Timestamp `json:"updated_at,omitempty"`
 	ClosedAt     Timestamp `json:"closed_at,omitempty"`
@@ -335,18 +335,18 @@ func newMilestone(milestone *github.Milestone) *Milestone {
 		return nil
 	}
 	m := &Milestone{}
-	m.URL = milestone.GetURL()
-	m.HTMLURL = milestone.GetHTMLURL()
-	m.LabelsURL = milestone.GetLabelsURL()
-	m.ID = milestone.GetID()
-	m.NodeID = milestone.GetNodeID()
-	m.Number = milestone.GetNumber()
+	m.Url = milestone.GetURL()
+	m.HtmlUrl = milestone.GetHTMLURL()
+	m.LabelsUrl = milestone.GetLabelsURL()
+	m.Id = float64(milestone.GetID())
+	m.NodeId = milestone.GetNodeID()
+	m.Number = float64(milestone.GetNumber())
 	m.State = milestone.GetState()
 	m.Title = milestone.GetTitle()
 	m.Description = milestone.GetDescription()
 	m.Creator = newUser(milestone.GetCreator())
-	m.OpenIssues = milestone.GetOpenIssues()
-	m.ClosedIssues = milestone.GetClosedIssues()
+	m.OpenIssues = float64(milestone.GetOpenIssues())
+	m.ClosedIssues = float64(milestone.GetClosedIssues())
 	m.CreatedAt = newTimestamp(milestone.CreatedAt)
 	m.UpdatedAt = newTimestamp(milestone.UpdatedAt)
 	m.ClosedAt = newTimestamp(milestone.ClosedAt)
@@ -355,23 +355,23 @@ func newMilestone(milestone *github.Milestone) *Milestone {
 }
 
 type PullRequestComment struct {
-	URL                 string    `json:"url"`
-	ID                  int64     `json:"id"`
-	NodeID              string    `json:"node_id"`
-	PullRequestReviewID int64     `json:"pull_request_review_id"`
+	Url                 string    `json:"url"`
+	Id                  float64   `json:"id"`
+	NodeId              string    `json:"node_id"`
+	PullRequestReviewId float64   `json:"pull_request_review_id"`
 	DiffHunk            string    `json:"diff_hunk"`
 	Path                string    `json:"path"`
-	Position            int       `json:"position"`
-	OriginalPosition    int       `json:"original_position"`
-	CommitID            string    `json:"commit_id"`
-	OriginalCommitID    string    `json:"original_commit_id"`
-	InReplyTo           int64     `json:"in_reply_to_id"`
+	Position            float64   `json:"position"`
+	OriginalPosition    float64   `json:"original_position"`
+	CommitId            string    `json:"commit_id"`
+	OriginalCommitId    string    `json:"original_commit_id"`
+	InReplyTo           float64   `json:"in_reply_to_id"`
 	User                *User     `json:"user,omitempty"`
 	Body                string    `json:"body"`
 	CreatedAt           Timestamp `json:"created_at,omitempty"`
 	UpdatedAt           Timestamp `json:"updated_at,omitempty"`
-	HTMLURL             string    `json:"html_url"`
-	PullRequestURL      string    `json:"pull_request_url"`
+	HtmlUrl             string    `json:"html_url"`
+	PullRequestUrl      string    `json:"pull_request_url"`
 	AuthorAssociation   string    `json:"author_association"`
 }
 
@@ -380,36 +380,36 @@ func newPullRequestComment(comment *github.PullRequestComment) *PullRequestComme
 		return nil
 	}
 	c := &PullRequestComment{}
-	c.URL = comment.GetURL()
-	c.ID = comment.GetID()
-	c.NodeID = comment.GetNodeID()
-	c.PullRequestReviewID = comment.GetPullRequestReviewID()
+	c.Url = comment.GetURL()
+	c.Id = float64(comment.GetID())
+	c.NodeId = comment.GetNodeID()
+	c.PullRequestReviewId = float64(comment.GetPullRequestReviewID())
 	c.DiffHunk = comment.GetDiffHunk()
 	c.Path = comment.GetPath()
-	c.Position = comment.GetPosition()
-	c.OriginalPosition = comment.GetOriginalPosition()
-	c.CommitID = comment.GetCommitID()
-	c.OriginalCommitID = comment.GetOriginalCommitID()
-	c.InReplyTo = comment.GetInReplyTo()
+	c.Position = float64(comment.GetPosition())
+	c.OriginalPosition = float64(comment.GetOriginalPosition())
+	c.CommitId = comment.GetCommitID()
+	c.OriginalCommitId = comment.GetOriginalCommitID()
+	c.InReplyTo = float64(comment.GetInReplyTo())
 	c.User = newUser(comment.GetUser())
 	c.Body = comment.GetBody()
 	c.CreatedAt = newTimestamp(comment.CreatedAt)
 	c.UpdatedAt = newTimestamp(comment.UpdatedAt)
-	c.HTMLURL = comment.GetHTMLURL()
-	c.PullRequestURL = comment.GetPullRequestURL()
+	c.HtmlUrl = comment.GetHTMLURL()
+	c.PullRequestUrl = comment.GetPullRequestURL()
 	c.AuthorAssociation = comment.GetAuthorAssociation()
 	return c
 }
 
 type PullRequestReview struct {
-	ID             int64  `json:"id"`
-	NodeID         string `json:"node_id"`
-	User           *User  `json:"user,omitempty"`
-	Body           string `json:"body"`
-	CommitID       string `json:"commit_id"`
-	State          string `json:"state"`
-	HTMLURL        string `json:"html_url"`
-	PullRequestURL string `json:"pull_request_url"`
+	Id             float64 `json:"id"`
+	NodeId         string  `json:"node_id"`
+	User           *User   `json:"user,omitempty"`
+	Body           string  `json:"body"`
+	CommitId       string  `json:"commit_id"`
+	State          string  `json:"state"`
+	HtmlUrl        string  `json:"html_url"`
+	PullRequestUrl string  `json:"pull_request_url"`
 }
 
 func newPullRequestReview(review *github.PullRequestReview) *PullRequestReview {
@@ -417,14 +417,14 @@ func newPullRequestReview(review *github.PullRequestReview) *PullRequestReview {
 		return nil
 	}
 	r := &PullRequestReview{}
-	r.ID = review.GetID()
-	r.NodeID = review.GetNodeID()
+	r.Id = float64(review.GetID())
+	r.NodeId = review.GetNodeID()
 	r.User = newUser(review.GetUser())
 	r.Body = review.GetBody()
-	r.CommitID = review.GetCommitID()
+	r.CommitId = review.GetCommitID()
 	r.State = review.GetState()
-	r.HTMLURL = review.GetHTMLURL()
-	r.PullRequestURL = review.GetPullRequestURL()
+	r.HtmlUrl = review.GetHTMLURL()
+	r.PullRequestUrl = review.GetPullRequestURL()
 	return r
 }
 
@@ -465,11 +465,11 @@ func newSignatureVerification(sig *github.SignatureVerification) *SignatureVerif
 }
 
 type Commit struct {
-	URL          string                 `json:"url"`
+	Url          string                 `json:"url"`
 	Author       *CommitAuthor          `json:"author,omitempty"`
 	Committer    *CommitAuthor          `json:"committer,omitempty"`
 	Message      string                 `json:"message"`
-	CommentCount int                    `json:"comment_count"`
+	CommentCount float64                `json:"comment_count"`
 	Verification *SignatureVerification `json:"verification,omitempty"`
 }
 
@@ -478,22 +478,22 @@ func newCommit(commit *github.Commit) *Commit {
 		return nil
 	}
 	c := &Commit{}
-	c.URL = commit.GetURL()
+	c.Url = commit.GetURL()
 	c.Author = newCommitAuthor(commit.GetAuthor())
 	c.Committer = newCommitAuthor(commit.GetCommitter())
 	c.Message = commit.GetMessage()
 	//c.Tree = newTree(commit.GetTree()) // tree response specification is unknown
-	c.CommentCount = commit.GetCommentCount()
+	c.CommentCount = float64(commit.GetCommentCount())
 	c.Verification = newSignatureVerification(commit.GetVerification())
 	return c
 }
 
 type RepositoryCommit struct {
-	URL         string    `json:"url"`
-	SHA         string    `json:"sha"`
-	NodeID      string    `json:"node_id"`
-	HTMLURL     string    `json:"html_url"`
-	CommentsURL string    `json:"comments_url"`
+	Url         string    `json:"url"`
+	Sha         string    `json:"sha"`
+	NodeId      string    `json:"node_id"`
+	HtmlUrl     string    `json:"html_url"`
+	CommentsUrl string    `json:"comments_url"`
 	Commit      *Commit   `json:"commit,omitempty"`
 	Author      *User     `json:"author,omitempty"`
 	Committer   *User     `json:"committer,omitempty"`
@@ -505,11 +505,11 @@ func newRepositoryCommit(commit *github.RepositoryCommit) *RepositoryCommit {
 		return nil
 	}
 	c := &RepositoryCommit{}
-	c.URL = commit.GetURL()
-	c.SHA = commit.GetSHA()
-	c.NodeID = commit.GetNodeID()
-	c.HTMLURL = commit.GetHTMLURL()
-	c.CommentsURL = commit.GetCommentsURL()
+	c.Url = commit.GetURL()
+	c.Sha = commit.GetSHA()
+	c.NodeId = commit.GetNodeID()
+	c.HtmlUrl = commit.GetHTMLURL()
+	c.CommentsUrl = commit.GetCommentsURL()
 	c.Commit = newCommit(commit.GetCommit())
 	c.Author = newUser(commit.GetAuthor())
 	c.Committer = newUser(commit.GetCommitter())
@@ -521,12 +521,12 @@ func newRepositoryCommit(commit *github.RepositoryCommit) *RepositoryCommit {
 }
 
 type RepoStatus struct {
-	URL         string    `json:"url"`
-	ID          int64     `json:"id"`
-	NodeID      string    `json:"node_id"`
+	Url         string    `json:"url"`
+	Id          float64   `json:"id"`
+	NodeId      string    `json:"node_id"`
 	State       string    `json:"state"`
 	Description string    `json:"description"`
-	TargetURL   string    `json:"target_url"`
+	TargetUrl   string    `json:"target_url"`
 	Context     string    `json:"context"`
 	CreatedAt   Timestamp `json:"created_at,omitempty"`
 	UpdatedAt   Timestamp `json:"updated_at,omitempty"`
@@ -538,13 +538,13 @@ func newRepoStatus(status *github.RepoStatus) *RepoStatus {
 		return nil
 	}
 	s := &RepoStatus{}
-	s.URL = status.GetURL()
-	//s.AvatarURL = status.GetAvatarURL // go-github not support
-	s.ID = status.GetID()
-	s.NodeID = status.GetNodeID()
+	s.Url = status.GetURL()
+	//s.AvatarUrl = status.GetAvatarURL() // go-github not support
+	s.Id = float64(status.GetID())
+	s.NodeId = status.GetNodeID()
 	s.State = status.GetState()
 	s.Description = status.GetDescription()
-	s.TargetURL = status.GetTargetURL()
+	s.TargetUrl = status.GetTargetURL()
 	s.Context = status.GetContext()
 	s.CreatedAt = newTimestamp(status.CreatedAt)
 	s.UpdatedAt = newTimestamp(status.UpdatedAt)
@@ -553,19 +553,19 @@ func newRepoStatus(status *github.RepoStatus) *RepoStatus {
 }
 
 type PullRequest struct {
-	URL                 string                `json:"url"`
-	ID                  int64                 `json:"id"`
-	NodeID              string                `json:"node_id"`
-	HTMLURL             string                `json:"html_url"`
-	DiffURL             string                `json:"diff_url"`
-	PatchURL            string                `json:"patch_url"`
-	IssueURL            string                `json:"issue_url"`
-	CommitsURL          string                `json:"commits_url"`
-	ReviewCommentsURL   string                `json:"review_comments_url"`
-	ReviewCommentURL    string                `json:"review_comment_url"`
-	CommentsURL         string                `json:"comments_url"`
-	StatusesURL         string                `json:"statuses_url"`
-	Number              int                   `json:"number"`
+	Url                 string                `json:"url"`
+	Id                  float64               `json:"id"`
+	NodeId              string                `json:"node_id"`
+	HtmlUrl             string                `json:"html_url"`
+	DiffUrl             string                `json:"diff_url"`
+	PatchUrl            string                `json:"patch_url"`
+	IssueUrl            string                `json:"issue_url"`
+	CommitsUrl          string                `json:"commits_url"`
+	ReviewCommentsUrl   string                `json:"review_comments_url"`
+	ReviewCommentUrl    string                `json:"review_comment_url"`
+	CommentsUrl         string                `json:"comments_url"`
+	StatusesUrl         string                `json:"statuses_url"`
+	Number              float64               `json:"number"`
 	State               string                `json:"state"`
 	Locked              bool                  `json:"locked"`
 	Title               string                `json:"title"`
@@ -578,7 +578,7 @@ type PullRequest struct {
 	UpdatedAt           Timestamp             `json:"updated_at,omitempty"`
 	ClosedAt            Timestamp             `json:"closed_at,omitempty"`
 	MergedAt            Timestamp             `json:"merged_at,omitempty"`
-	MergeCommitSHA      string                `json:"merge_commit_sha"`
+	MergeCommitSha      string                `json:"merge_commit_sha"`
 	Assignee            *User                 `json:"assignee,omitempty"`
 	Assignees           []*User               `json:"assignees,omitempty"`
 	RequestedReviewers  []*User               `json:"requested_reviewers,omitempty"`
@@ -592,11 +592,11 @@ type PullRequest struct {
 	Rebaseable          bool                  `json:"rebaseable"`
 	MergeableState      string                `json:"mergeable_state"`
 	MergedBy            *User                 `json:"merged_by,omitempty"`
-	ReviewComments      int                   `json:"review_comments"`
+	ReviewComments      float64               `json:"review_comments"`
 	MaintainerCanModify bool                  `json:"maintainer_can_modify"`
-	Additions           int                   `json:"additions"`
-	Deletions           int                   `json:"deletions"`
-	ChangedFiles        int                   `json:"changed_files"`
+	Additions           float64               `json:"additions"`
+	Deletions           float64               `json:"deletions"`
+	ChangedFiles        float64               `json:"changed_files"`
 	Comments            []*PullRequestComment `json:"comments"`
 	Reviews             []*PullRequestReview  `json:"reviews"`
 	Commits             []*RepositoryCommit   `json:"commits"`
@@ -610,19 +610,19 @@ func newPullRequest(owner string, repo string, pull *github.PullRequest, comment
 		return nil
 	}
 	p := &PullRequest{}
-	p.URL = pull.GetURL()
-	p.ID = pull.GetID()
-	p.NodeID = pull.GetNodeID()
-	p.HTMLURL = pull.GetHTMLURL()
-	p.DiffURL = pull.GetDiffURL()
-	p.PatchURL = pull.GetPatchURL()
-	p.IssueURL = pull.GetIssueURL()
-	p.CommitsURL = pull.GetCommitsURL()
-	p.ReviewCommentsURL = pull.GetReviewCommentsURL()
-	p.ReviewCommentURL = pull.GetReviewCommentURL()
-	p.CommentsURL = pull.GetCommentsURL()
-	p.StatusesURL = pull.GetStatusesURL()
-	p.Number = pull.GetNumber()
+	p.Url = pull.GetURL()
+	p.Id = float64(pull.GetID())
+	p.NodeId = pull.GetNodeID()
+	p.HtmlUrl = pull.GetHTMLURL()
+	p.DiffUrl = pull.GetDiffURL()
+	p.PatchUrl = pull.GetPatchURL()
+	p.IssueUrl = pull.GetIssueURL()
+	p.CommitsUrl = pull.GetCommitsURL()
+	p.ReviewCommentsUrl = pull.GetReviewCommentsURL()
+	p.ReviewCommentUrl = pull.GetReviewCommentURL()
+	p.CommentsUrl = pull.GetCommentsURL()
+	p.StatusesUrl = pull.GetStatusesURL()
+	p.Number = float64(pull.GetNumber())
 	p.State = pull.GetState()
 	p.Locked = pull.GetLocked()
 	p.Title = pull.GetTitle()
@@ -638,7 +638,7 @@ func newPullRequest(owner string, repo string, pull *github.PullRequest, comment
 	p.UpdatedAt = newTimestamp(pull.UpdatedAt)
 	p.ClosedAt = newTimestamp(pull.ClosedAt)
 	p.MergedAt = newTimestamp(pull.MergedAt)
-	p.MergeCommitSHA = pull.GetMergeCommitSHA()
+	p.MergeCommitSha = pull.GetMergeCommitSHA()
 	p.Assignee = newUser(pull.GetAssignee())
 	p.Assignees = make([]*User, len(pull.Assignees))
 	for i, v := range pull.Assignees {
@@ -661,11 +661,11 @@ func newPullRequest(owner string, repo string, pull *github.PullRequest, comment
 	p.Rebaseable = pull.GetRebaseable()
 	p.MergeableState = pull.GetMergeableState()
 	p.MergedBy = newUser(pull.GetMergedBy())
-	p.ReviewComments = pull.GetReviewComments()
+	p.ReviewComments = float64(pull.GetReviewComments())
 	p.MaintainerCanModify = pull.GetMaintainerCanModify()
-	p.Additions = pull.GetAdditions()
-	p.Deletions = pull.GetDeletions()
-	p.ChangedFiles = pull.GetChangedFiles()
+	p.Additions = float64(pull.GetAdditions())
+	p.Deletions = float64(pull.GetDeletions())
+	p.ChangedFiles = float64(pull.GetChangedFiles())
 	p.Comments = make([]*PullRequestComment, len(comments))
 	for i, comment := range comments {
 		p.Comments[i] = newPullRequestComment(comment)

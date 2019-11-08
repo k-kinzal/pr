@@ -184,7 +184,7 @@ func TestPullRequestRules_Apply(t *testing.T) {
 	now := api.Timestamp(time.Now().UTC().Unix())
 	pulls := []*api.PullRequest{
 		{
-			ID:        1,
+			Id:        1,
 			State:     "open",
 			CreatedAt: now,
 			Statuses: []*api.RepoStatus{

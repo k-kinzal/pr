@@ -19,6 +19,7 @@ var (
 	stateRegexp       = regexp.MustCompile("state\\s*[=!]=\\s*`\"(.*?)\"`")
 	headRegexp        = regexp.MustCompile("head\\s*[=!]=\\s*`\"(.*?)\"`")
 	baseRegexp        = regexp.MustCompile("base\\s*[=!]=\\s*`\"(.*?)\"`")
+	shaRegexp         = regexp.MustCompile("head.sha\\s*[=!]=\\s*`\"(.*?)\"`")
 	dateRegexp        = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`)
 	timeRegexp        = regexp.MustCompile(`"\d{2}:\d{2}:\d{2}"`)
 	nowFunctionRegexp = regexp.MustCompile(`now\(\)`)
@@ -32,6 +33,8 @@ type PullRequestRules struct {
 	state  string
 	head   string
 	base   string
+
+	sha string
 }
 
 func (r *PullRequestRules) GetNumber() int {
@@ -51,6 +54,10 @@ func (r *PullRequestRules) GetHead() string {
 
 func (r *PullRequestRules) GetBase() string {
 	return r.base
+}
+
+func (r *PullRequestRules) GetSHA() string {
+	return r.sha
 }
 
 func (r *PullRequestRules) GetLimit() int {
@@ -92,7 +99,7 @@ func (r *PullRequestRules) Apply(data []*PullRequest) ([]*PullRequest, error) {
 	for _, v := range filtered.([]interface{}) {
 		vv, _ := v.(*PullRequest)
 		for ; i < len(data); i++ {
-			if data[i].ID == vv.ID {
+			if data[i].Id == vv.Id {
 				pulls = append(pulls, data[i])
 				break
 			}
@@ -113,6 +120,7 @@ func NewPullRequestRules(rules []string, limit int) *PullRequestRules {
 	var state string
 	var head string
 	var base string
+	var sha string
 	for i, rule := range rules {
 		{
 			m := numberRegexp.FindSubmatch([]byte(rule))
@@ -137,6 +145,12 @@ func NewPullRequestRules(rules []string, limit int) *PullRequestRules {
 			m := baseRegexp.FindSubmatch([]byte(rule))
 			if len(m) == 2 {
 				base = string(m[1])
+			}
+		}
+		{
+			m := shaRegexp.FindSubmatch([]byte(rule))
+			if len(m) == 2 {
+				sha = string(m[1])
 			}
 		}
 
@@ -169,5 +183,6 @@ func NewPullRequestRules(rules []string, limit int) *PullRequestRules {
 		state:  state,
 		head:   head,
 		base:   base,
+		sha:    sha,
 	}
 }

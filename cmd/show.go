@@ -74,7 +74,7 @@ func ShowRun(cmd *cobra.Command, args []string) error {
 	//case ev.WatchPayload:
 	//}
 
-	if err := pr.Show(showOption); err != nil {
+	if err := pr.Show(opt); err != nil {
 		switch err.(type) {
 		case *pr.NoMatchError:
 			if exitCode {
