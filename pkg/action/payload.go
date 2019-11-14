@@ -11,7 +11,7 @@ import (
 var Payload interface{}
 
 func init() {
-	bytes, err := ioutil.ReadFile(EventName)
+	bytes, err := ioutil.ReadFile(EventPath)
 	if err != nil {
 		return
 	}

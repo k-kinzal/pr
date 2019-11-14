@@ -56,8 +56,27 @@ If you want to make an error if there is no PR that matches the rule, specify `-
 
 ```bash
 $ pr show [owner]/[repo] --exit-code -l 'number == `1`' -l 'state == `"open"`'
-[]
+[...]
 ```
+
+## Check
+
+When the PR CLI is run on the CI, the rule status is displayed separately from the CI.
+This is a solution to the problem where multiple CI statuses are displayed in GitHub Action.
+
+```bash
+$ pr check [owner]/[repo] -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+[...]
+```
+
+Check commands can perform conditional actions.
+
+```bash
+$ pr check [owner]/[repo] --merge -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+[...]
+```
+
+For PR with `number == 1`, merge if the condition is met, or change status to pending if the condition is not met.
 
 ## Rule Specification
 
@@ -80,7 +99,7 @@ NOTE: `--with-all` options have very poor performance. Not recommended for uses 
 
 ### Rule Expression
 
-In pr, rules are specified using [JMESPath](http://jmespath.org/).
+In PR CLI, rules are specified using [JMESPath](http://jmespath.org/).
 
 ```bash
 $ pr show [owner]/[repo] -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
@@ -120,7 +139,7 @@ $ pr show [owner]/[repo] -l
 
 ### GitHub Action
 
-If you execute PR with [GitHub Action], the rules are automatically completed by event type.
+If you execute PR CLI with [GitHub Action], the rules are automatically completed by event type.
 
 **Number completion**
 
