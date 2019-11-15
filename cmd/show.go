@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/google/go-github/v28/github"
 
@@ -54,17 +53,7 @@ func ShowRun(cmd *cobra.Command, args []string) error {
 		opt.Rules = append(opt.Rules, fmt.Sprintf("head.sha == `\"%s\"`", action.SHA))
 	}
 
-	if err := pr.Show(opt); err != nil {
-		switch err.(type) {
-		case *pr.NoMatchError:
-			if exitCode {
-				os.Exit(127)
-			}
-			return nil
-		}
-		return err
-	}
-	return nil
+	return pr.Show(opt)
 }
 
 func init() {

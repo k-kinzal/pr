@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/google/go-github/v28/github"
 
@@ -41,17 +40,7 @@ func CheckRun(cmd *cobra.Command, args []string) error {
 		opt.Action = "merge"
 	}
 
-	if err := pr.Check(opt); err != nil {
-		switch err.(type) {
-		case *pr.NoMatchError:
-			if exitCode {
-				os.Exit(127)
-			}
-			return nil
-		}
-		return err
-	}
-	return nil
+	return pr.Check(opt)
 }
 
 var (
