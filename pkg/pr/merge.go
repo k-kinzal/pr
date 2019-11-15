@@ -2,11 +2,6 @@ package pr
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"os"
-
-	"golang.org/x/xerrors"
 
 	"github.com/k-kinzal/pr/pkg/api"
 )
@@ -15,15 +10,15 @@ type MergeOption struct {
 	CommitTitleTemplate   string
 	CommitMessageTemplate string
 	MergeMethod           string
-	PullOption
+	*ListOption
 }
 
-func Merge(opt MergeOption) error {
+func Merge(owner string, repo string, opt *MergeOption) ([]*api.PullRequest, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	clientOption := &api.Options{
-		Token:     opt.Token,
+		Token:     token,
 		RateLimit: opt.Rate,
 	}
 	client := api.NewClient(ctx, clientOption)
@@ -35,13 +30,12 @@ func Merge(opt MergeOption) error {
 		EnableStatuses: opt.EnableStatuses,
 		Rules:          api.NewPullRequestRules(opt.Rules, opt.Limit),
 	}
-	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
+	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(pulls) == 0 {
-		fmt.Fprintln(os.Stdout, "[]")
-		return &NoMatchError{pullOption.Rules}
+		return nil, &NoMatchError{pullOption.Rules}
 	}
 
 	mergeOption := &api.MergeOption{
@@ -51,14 +45,8 @@ func Merge(opt MergeOption) error {
 	}
 	mergedPulls, err := client.Merge(ctx, pulls, mergeOption)
 	if err != nil {
-		return xerrors.Errorf("merge: %s", err)
+		return nil, err
 	}
 
-	out, err := json.Marshal(mergedPulls)
-	if err != nil {
-		return xerrors.Errorf("merge: %s", err)
-	}
-	fmt.Fprintln(os.Stdout, string(out))
-
-	return nil
+	return mergedPulls, nil
 }
