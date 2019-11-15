@@ -2,36 +2,26 @@ package pr
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/k-kinzal/pr/pkg/action"
 
 	"github.com/k-kinzal/pr/pkg/api"
-	"golang.org/x/xerrors"
 )
 
 type CheckOption struct {
-	TargetURL      string
-	Limit          int
-	Rate           int
-	Rules          []string
-	EnableComments bool
-	EnableReviews  bool
-	EnableCommits  bool
-	EnableStatuses bool
-	Action         string
-	MergeOption    MergeOption
-	Option
+	TargetURL string
+	Action    string
+	*MergeOption
+	*ListOption
 }
 
-func Check(opt CheckOption) error {
+func Check(owner string, repo string, opt *CheckOption) ([]*api.PullRequest, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	clientOption := &api.Options{
-		Token:     opt.Token,
+		Token:     token,
 		RateLimit: opt.Rate,
 	}
 	client := api.NewClient(ctx, clientOption)
@@ -48,9 +38,9 @@ func Check(opt CheckOption) error {
 		EnableStatuses: true,
 		Rules:          rules.SearchRules(),
 	}
-	pulls, err := client.GetPulls(ctx, opt.Owner, opt.Repo, pullOption)
+	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)
 	if err != nil {
-		return xerrors.Errorf("check: %s", err)
+		return nil, err
 	}
 
 	if opt.TargetURL == "" && action.Actions {
@@ -64,12 +54,12 @@ func Check(opt CheckOption) error {
 	}
 	checked, err := client.Check(ctx, pulls, checkOption)
 	if err != nil {
-		return xerrors.Errorf("check: %s", err)
+		return nil, err
 	}
 
 	filterd, filterdErr := rules.Apply(checked)
 	if filterdErr != nil {
-		return xerrors.Errorf("check: %s", err)
+		return nil, err
 	}
 	matches := make([]*api.PullRequest, 0)
 	nomatches := make([]*api.PullRequest, 0)
@@ -90,13 +80,13 @@ func Check(opt CheckOption) error {
 	checkOption.Description = "Matched the rules"
 	checkedMatches, err := client.Check(ctx, matches, checkOption)
 	if err != nil {
-		return xerrors.Errorf("check: %s", err)
+		return nil, err
 	}
 	checkOption.State = "pending"
 	checkOption.Description = fmt.Sprintf("Does not match `%s`", rules.Expression())
 	checkeNomatches, err := client.Check(ctx, nomatches, checkOption)
 	if err != nil {
-		return xerrors.Errorf("check: %s", err)
+		return nil, err
 	}
 
 	var actioned []*api.PullRequest
@@ -109,18 +99,12 @@ func Check(opt CheckOption) error {
 		}
 		merged, err := client.Merge(ctx, checkedMatches, mergeOption)
 		if err != nil {
-			return xerrors.Errorf("check: %s", err)
+			return nil, err
 		}
 		actioned = merged
 	default:
 		actioned = checkedMatches
 	}
 
-	out, err := json.Marshal(append(actioned, checkeNomatches...))
-	if err != nil {
-		return xerrors.Errorf("check: %s", err)
-	}
-	fmt.Fprintln(os.Stdout, string(out))
-
-	return nil
+	return append(actioned, checkeNomatches...), nil
 }
