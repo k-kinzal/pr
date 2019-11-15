@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	ev "gopkg.in/go-playground/webhooks.v5/github"
+	"github.com/google/go-github/v28/github"
 )
 
 // https://help.github.com/ja/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
@@ -15,130 +15,130 @@ func init() {
 	if err != nil {
 		return
 	}
-	switch ev.Event(EventName) {
-	case ev.CheckRunEvent:
-		var v *ev.CheckRunPayload
+	switch EventName {
+	case "check_run":
+		var v *github.CheckRunEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.CheckSuiteEvent:
-		var v *ev.CheckRunPayload
+	case "check_suite":
+		var v *github.CheckRunEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.CreateEvent:
-		var v *ev.CreatePayload
+	case "create":
+		var v *github.CreateEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.DeleteEvent:
-		var v *ev.DeletePayload
+	case "delete":
+		var v *github.DeleteEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.DeploymentEvent:
-		var v *ev.DeploymentPayload
+	case "deployment":
+		var v *github.DeploymentEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.DeploymentStatusEvent:
-		var v *ev.DeploymentStatusPayload
+	case "deployment_status":
+		var v *github.DeploymentStatusEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.ForkEvent:
-		var v *ev.ForkPayload
+	case "fork":
+		var v *github.ForkEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.GollumEvent:
-		var v *ev.GollumPayload
+	case "gollum":
+		var v *github.GollumEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.IssueCommentEvent:
-		var v *ev.IssueCommentPayload
+	case "issue_comment":
+		var v *github.IssueCommentEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.IssuesEvent:
-		var v *ev.IssuesPayload
+	case "issues":
+		var v *github.IssuesEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.LabelEvent:
-		var v *ev.LabelPayload
+	case "label":
+		var v *github.LabelEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.MemberEvent:
-		var v *ev.MemberPayload
+	case "member":
+		var v *github.MemberEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.MilestoneEvent:
-		var v *ev.MilestonePayload
+	case "milestone":
+		var v *github.MilestoneEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.PageBuildEvent:
-		var v *ev.PageBuildPayload
+	case "page_build":
+		var v *github.PageBuildEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.ProjectEvent:
-		var v *ev.CheckRunPayload
+	case "project":
+		var v *github.CheckRunEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.ProjectCardEvent:
-		var v *ev.ProjectCardPayload
+	case "project_card":
+		var v *github.ProjectCardEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.ProjectColumnEvent:
-		var v *ev.ProjectColumnPayload
+	case "project_column":
+		var v *github.ProjectColumnEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
 		return
-	case ev.PublicEvent:
-		var v *ev.PublicPayload
+	case "public":
+		var v *github.PublicEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.PullRequestEvent:
-		var v *ev.PullRequestPayload
+	case "pull_request":
+		var v *github.PullRequestEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.PullRequestReviewEvent:
-		var v *ev.PullRequestReviewPayload
+	case "pull_request_review":
+		var v *github.PullRequestReviewEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.PullRequestReviewCommentEvent:
-		var v *ev.PullRequestReviewCommentPayload
+	case "pull_request_review_comment":
+		var v *github.PullRequestReviewCommentEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.PushEvent:
-		var v *ev.PushPayload
+	case "push":
+		var v *github.PushEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.ReleaseEvent:
-		var v *ev.ReleasePayload
+	case "release":
+		var v *github.ReleaseEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.StatusEvent:
-		var v *ev.StatusPayload
+	case "status":
+		var v *github.StatusEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}
-	case ev.WatchEvent:
-		var v *ev.WatchPayload
+	case "watch":
+		var v *github.WatchEvent
 		if err := json.Unmarshal(bytes, &v); err == nil {
 			Payload = v
 		}

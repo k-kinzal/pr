@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	ev "gopkg.in/go-playground/webhooks.v5/github"
 )
 
 // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
@@ -37,22 +35,22 @@ func PullNumber() *int {
 
 func BranchName() *string {
 	ref := Ref
-	switch ev.Event(EventName) {
-	case ev.CreateEvent:
+	switch EventName {
+	case "create":
 		return &ref
-	case ev.DeploymentEvent:
+	case "deployment":
 		if ref == "" {
 			return nil
 		}
 		return &ref
-	case ev.DeploymentStatusEvent:
+	case "deployment_status":
 		if ref == "" {
 			return nil
 		}
 		return &ref
-	case ev.PushEvent:
+	case "push":
 		return &ref
-	case ev.ReleaseEvent:
+	case "release":
 		branch := fmt.Sprintf("refs/tags/%s", ref)
 		return &branch
 	}
@@ -61,26 +59,26 @@ func BranchName() *string {
 
 func TagName() *string {
 	ref := Ref
-	switch ev.Event(EventName) {
-	case ev.CreateEvent:
+	switch EventName {
+	case "create":
 		if !strings.HasPrefix(ref, "refs/tags/") {
 			return nil
 		}
 		tag := strings.TrimPrefix(ref, "refs/tags/")
 		return &tag
-	case ev.DeploymentEvent:
+	case "deployment":
 		if !strings.HasPrefix(ref, "refs/tags/") {
 			return nil
 		}
 		tag := strings.TrimPrefix(ref, "refs/tags/")
 		return &tag
-	case ev.DeploymentStatusEvent:
+	case "deployment_status":
 		if !strings.HasPrefix(ref, "refs/tags/") {
 			return nil
 		}
 		tag := strings.TrimPrefix(ref, "refs/tags/")
 		return &tag
-	case ev.ReleaseEvent:
+	case "release":
 		return &ref
 	}
 	return nil

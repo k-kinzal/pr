@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/go-github/v28/github"
+
 	"github.com/k-kinzal/pr/pkg/action"
 
 	"github.com/k-kinzal/pr/pkg/pr"
 	"github.com/spf13/cobra"
-
-	ev "gopkg.in/go-playground/webhooks.v5/github"
 )
 
 func CheckRun(cmd *cobra.Command, args []string) error {
@@ -31,33 +31,10 @@ func CheckRun(cmd *cobra.Command, args []string) error {
 	}
 
 	switch action.Payload.(type) {
-	case ev.CheckRunPayload:
-	case ev.CheckSuitePayload:
-	case ev.CreatePayload:
-	case ev.DeletePayload:
-	case ev.DeploymentPayload:
-	case ev.DeploymentStatusPayload:
-	case ev.ForkPayload:
-	case ev.GollumPayload:
-	case ev.IssueCommentPayload:
-	case ev.IssuesPayload:
-	case ev.LabelPayload:
-	case ev.MemberPayload:
-	case ev.MilestonePayload:
-	case ev.PageBuildPayload:
+	case github.PageBuildEvent:
 		opt.Rules = append(opt.Rules, fmt.Sprintf("head.sha == `\"%s\"`", action.SHA))
-	case ev.ProjectPayload:
-	case ev.ProjectCardPayload:
-	case ev.ProjectColumnPayload:
-	case ev.PublicPayload:
-	case ev.PullRequestPayload:
-	case ev.PullRequestReviewPayload:
-	case ev.PullRequestReviewCommentPayload:
-	case ev.PushPayload:
-	case ev.ReleasePayload:
-	case ev.StatusPayload:
+	case github.StatusEvent:
 		opt.Rules = append(opt.Rules, fmt.Sprintf("head.sha == `\"%s\"`", action.SHA))
-	case ev.WatchPayload:
 	}
 
 	if b, _ := cmd.Flags().GetBool("merge"); b {
