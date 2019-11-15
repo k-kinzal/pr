@@ -102,7 +102,7 @@ func Check(opt CheckOption) error {
 	var actioned []*api.PullRequest
 	switch opt.Action {
 	case "merge":
-		mergeOption := api.MergeOption{
+		mergeOption := &api.MergeOption{
 			CommitTitleTemplate:   opt.MergeOption.CommitTitleTemplate,
 			CommitMessageTemplate: opt.MergeOption.CommitMessageTemplate,
 			MergeMethod:           opt.MergeOption.MergeMethod,

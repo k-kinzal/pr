@@ -44,7 +44,7 @@ func Merge(opt MergeOption) error {
 		return &NoMatchError{pullOption.Rules}
 	}
 
-	mergeOption := api.MergeOption{
+	mergeOption := &api.MergeOption{
 		CommitTitleTemplate:   opt.CommitTitleTemplate,
 		CommitMessageTemplate: opt.CommitMessageTemplate,
 		MergeMethod:           opt.MergeMethod,
