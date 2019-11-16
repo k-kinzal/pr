@@ -43,22 +43,6 @@ $ pr merge [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(stat
 [...]
 ```
 
-## Show
-
-Check the PR that matches the rule.
-
-```bash
-$ pr show [owner]/[repo] -l 'state == `"open"`'
-[...]
-```
-
-If you want to make an error if there is no PR that matches the rule, specify `--exit-code``.
-
-```bash
-$ pr show [owner]/[repo] --exit-code -l 'number == `1`' -l 'state == `"open"`'
-[...]
-```
-
 ## Check
 
 When the PR CLI is run on the CI, the rule status is displayed separately from the CI.
@@ -77,6 +61,34 @@ $ pr check [owner]/[repo] --merge -l 'number == `1`' -l 'state == `"open"`' -l '
 ```
 
 For PR with `number == 1`, merge if the condition is met, or change status to pending if the condition is not met.
+
+## Show
+
+Check the PR that matches the rule.
+
+```bash
+$ pr show [owner]/[repo] -l 'state == `"open"`'
+[...]
+```
+
+If you want to make an error if there is no PR that matches the rule, specify `--exit-code``.
+
+```bash
+$ pr show [owner]/[repo] --exit-code -l 'number == `1`' -l 'state == `"open"`'
+[...]
+```
+
+## Validate
+
+Validate the rules.
+
+```bash
+$ pr validate [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses) > `0`' -l 'user.name == `"github-action[bot]"`'
+[x] state == `"open"`: 1 PRs matched the rules
+[x] length(statuses) > `0`: 1 PRs matched the rules
+[ ] user.name == `"github-action[bot]"`: no PR matches the rule
+[]
+```
 
 ## Rule Specification
 
