@@ -10,14 +10,14 @@ import (
 	"github.com/google/go-github/v28/github"
 )
 
-type CheckOption struct {
+type StatusOption struct {
 	State       string
 	TargetURL   string
 	Description string
 	Context     string
 }
 
-func (c *Client) Check(ctx context.Context, pulls []*PullRequest, opt *CheckOption) ([]*PullRequest, error) {
+func (c *Client) Status(ctx context.Context, pulls []*PullRequest, opt *StatusOption) ([]*PullRequest, error) {
 	eg, ctx := errgroup.WithContext(ctx)
 
 	for _, pull := range pulls {
