@@ -54,6 +54,7 @@ func setListFrags(cmd *cobra.Command) *pr.ListOption {
 	cmd.Flags().BoolVar(&opt.EnableReviews, "with-reviews", false, "if true, do retrieve review link relations to PR")
 	cmd.Flags().BoolVar(&opt.EnableCommits, "with-commits", false, "if true, do retrieve commit link relations to PR")
 	cmd.Flags().BoolVar(&opt.EnableStatuses, "with-statuses", false, "if true, do retrieve status link relations to PR")
+	cmd.Flags().BoolVar(&opt.EnableChecks, "with-checks", false, "if true, do retrieve check link relations to PR")
 	cmd.Flags().Bool("with-all", false, "if true, do retrieve link relations to PR (NOTE: this option should be disabled if there are many PR)")
 	cmd.Flags().StringArrayVarP(&opt.Rules, "rule", "l", nil, "JMESPath format view rules")
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
@@ -64,6 +65,7 @@ func setListFrags(cmd *cobra.Command) *pr.ListOption {
 			opt.EnableReviews = true
 			opt.EnableCommits = true
 			opt.EnableStatuses = true
+			opt.EnableChecks = true
 		}
 
 		if pullNumber := action.PullNumber(); pullNumber != nil {

@@ -24,6 +24,7 @@ type ListOption struct {
 	EnableReviews  bool
 	EnableCommits  bool
 	EnableStatuses bool
+	EnableChecks   bool
 }
 
 func List(owner string, repo string, opt *ListOption) ([]*api.PullRequest, error) {
@@ -41,6 +42,7 @@ func List(owner string, repo string, opt *ListOption) ([]*api.PullRequest, error
 		EnableReviews:  opt.EnableReviews,
 		EnableCommits:  opt.EnableCommits,
 		EnableStatuses: opt.EnableStatuses,
+		EnableChecks:   opt.EnableChecks,
 		Rules:          api.NewPullRequestRules(opt.Rules, opt.Limit),
 	}
 	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)
