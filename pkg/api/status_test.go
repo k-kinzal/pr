@@ -77,13 +77,13 @@ func TestClient_Check(t *testing.T) {
 		Token:     "xxxx",
 		RateLimit: math.MaxInt32,
 	})
-	opt := &api.CheckOption{
+	opt := &api.StatusOption{
 		State:       "pending",
 		TargetURL:   "https://github.com/{{ .Owner }}/{{ .Repo }}/commit/{{ .Head.Sha }}/checks",
 		Description: "Test check",
 		Context:     "PR",
 	}
-	pulls, err := client.Check(ctx, pulls, opt)
+	pulls, err := client.Status(ctx, pulls, opt)
 	if err != nil {
 		t.Fatal(err)
 	}

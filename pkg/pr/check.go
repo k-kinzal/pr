@@ -46,13 +46,13 @@ func Check(owner string, repo string, opt *CheckOption) ([]*api.PullRequest, err
 	if opt.TargetURL == "" && action.Actions {
 		opt.TargetURL = "https://github.com/{{ .Owner }}/{{ .Repo }}/commit/{{ .Head.Sha }}/checks"
 	}
-	checkOption := &api.CheckOption{
+	statusOption := &api.StatusOption{
 		State:       "pending",
 		TargetURL:   opt.TargetURL,
 		Description: "Checking for matching rules",
 		Context:     "PR",
 	}
-	checked, err := client.Check(ctx, pulls, checkOption)
+	checked, err := client.Status(ctx, pulls, statusOption)
 	if err != nil {
 		return nil, err
 	}
@@ -76,15 +76,15 @@ func Check(owner string, repo string, opt *CheckOption) ([]*api.PullRequest, err
 		}
 	}
 
-	checkOption.State = "success"
-	checkOption.Description = "Matched the rules"
-	checkedMatches, err := client.Check(ctx, matches, checkOption)
+	statusOption.State = "success"
+	statusOption.Description = "Matched the rules"
+	checkedMatches, err := client.Status(ctx, matches, statusOption)
 	if err != nil {
 		return nil, err
 	}
-	checkOption.State = "pending"
-	checkOption.Description = fmt.Sprintf("Does not match `%s`", rules.Expression())
-	checkeNomatches, err := client.Check(ctx, nomatches, checkOption)
+	statusOption.State = "pending"
+	statusOption.Description = fmt.Sprintf("Does not match `%s`", rules.Expression())
+	checkeNomatches, err := client.Status(ctx, nomatches, statusOption)
 	if err != nil {
 		return nil, err
 	}

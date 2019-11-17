@@ -14,6 +14,7 @@ type PullsOption struct {
 	EnableReviews  bool
 	EnableCommits  bool
 	EnableStatuses bool
+	EnableChecks   bool
 	Rules          *PullRequestRules
 }
 
@@ -76,7 +77,7 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 				}
 			case *github.PullRequest:
 				index := len(pulls)
-				pull := newPullRequest(owner, repo, body, nil, nil, nil, nil)
+				pull := newPullRequest(owner, repo, body, nil, nil, nil, nil, nil)
 				pullsIndexesByNumber[body.GetNumber()] = index
 				pullsIndexesBySHA[body.GetHead().GetSHA()] = index
 				pulls = append(pulls, pull)
@@ -106,12 +107,20 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 						return c.github.Repositories.ListStatuses(childCtx, owner, repo, body.GetHead().GetSHA(), opt)
 					})
 				}
+				if opt.EnableChecks {
+					pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+						checkRunOptions := &github.ListCheckRunsOptions{
+							ListOptions: *opt,
+						}
+						return c.github.Checks.ListCheckRunsForRef(childCtx, owner, repo, body.GetHead().GetSHA(), checkRunOptions)
+					})
+				}
 
 			case []*github.PullRequest:
 				values := make([]*PullRequest, len(body))
 				for i, v := range body {
 					index := len(pulls) + i
-					values[i] = newPullRequest(owner, repo, v, nil, nil, nil, nil)
+					values[i] = newPullRequest(owner, repo, v, nil, nil, nil, nil, nil)
 					pullsIndexesByNumber[v.GetNumber()] = index
 					pullsIndexesBySHA[v.GetHead().GetSHA()] = index
 				}
@@ -142,6 +151,14 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 						if opt.EnableStatuses {
 							pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
 								return c.github.Repositories.ListStatuses(childCtx, owner, repo, pull.GetHead().GetSHA(), opt)
+							})
+						}
+						if opt.EnableChecks {
+							pagenation.Request(childCtx, func(opt *github.ListOptions) (interface{}, *github.Response, error) {
+								checkRunOptions := &github.ListCheckRunsOptions{
+									ListOptions: *opt,
+								}
+								return c.github.Checks.ListCheckRunsForRef(childCtx, owner, repo, pull.GetHead().GetSHA(), checkRunOptions)
 							})
 						}
 					}(v)
@@ -186,6 +203,16 @@ func (c *Client) GetPulls(ctx context.Context, owner string, repo string, opt Pu
 					statuses[i] = newRepoStatus(status)
 				}
 				pulls[index].Statuses = append(pulls[index].Statuses, statuses...)
+			case *github.ListCheckRunsResults:
+				// /repos/[owner]/[repo]/commits/[]sha/check-runs
+				s := strings.Split(res.Response().Request.URL.Path, "/")
+				sha := s[len(s)-2]
+				index := pullsIndexesBySHA[sha]
+				checks := make([]*CheckRun, len(body.CheckRuns))
+				for i, run := range body.CheckRuns {
+					checks[i] = newCheckRun(run)
+				}
+				pulls[index].Checks = append(pulls[index].Checks, checks...)
 			}
 		}
 	}

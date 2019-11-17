@@ -552,6 +552,192 @@ func newRepoStatus(status *github.RepoStatus) *RepoStatus {
 	return s
 }
 
+type App struct {
+	Id          float64   `json:"id,omitempty"`
+	NodeId      string    `json:"node_id,omitempty"`
+	Owner       *User     `json:"owner,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	ExternalUrl string    `json:"external_url,omitempty"`
+	HtmlUrl     string    `json:"html_url,omitempty"`
+	CreatedAt   Timestamp `json:"created_at,omitempty"`
+	UpdatedAt   Timestamp `json:"updated_at,omitempty"`
+}
+
+func newApp(app *github.App) *App {
+	if app == nil {
+		return nil
+	}
+	a := &App{}
+	a.Id = float64(app.GetID())
+	a.NodeId = app.GetNodeID()
+	a.Owner = newUser(app.GetOwner())
+	a.Name = app.GetName()
+	a.Description = app.GetDescription()
+	a.ExternalUrl = app.GetExternalURL()
+	a.HtmlUrl = app.GetHTMLURL()
+	t1 := app.GetCreatedAt().Time
+	a.CreatedAt = newTimestamp(&t1)
+	t2 := app.GetUpdatedAt().Time
+	a.UpdatedAt = newTimestamp(&t2)
+	return a
+}
+
+type CheckSuite struct {
+	Id         float64     `json:"id,omitempty"`
+	NodeId     string      `json:"node_id,omitempty"`
+	HeadBranch string      `json:"head_branch,omitempty"`
+	HeadSha    string      `json:"head_sha,omitempty"`
+	Url        string      `json:"url,omitempty"`
+	BeforeSha  string      `json:"before,omitempty"`
+	AfterSha   string      `json:"after,omitempty"`
+	Status     string      `json:"status,omitempty"`
+	Conclusion string      `json:"conclusion,omitempty"`
+	App        *App        `json:"app,omitempty"`
+	Repository *Repository `json:"repository,omitempty"`
+	HeadCommit *Commit     `json:"head_commit,omitempty"`
+}
+
+func newCheckSuite(suite *github.CheckSuite) *CheckSuite {
+	if suite == nil {
+		return nil
+	}
+	s := &CheckSuite{}
+	s.Id = float64(suite.GetID())
+	s.NodeId = suite.GetNodeID()
+	s.HeadBranch = suite.GetHeadBranch()
+	s.HeadSha = suite.GetHeadSHA()
+	s.Url = suite.GetURL()
+	s.BeforeSha = suite.GetBeforeSHA()
+	s.AfterSha = suite.GetAfterSHA()
+	s.Status = suite.GetStatus()
+	s.Conclusion = suite.GetConclusion()
+	s.App = newApp(suite.GetApp())
+	s.Repository = newRepository(suite.GetRepository())
+	s.HeadCommit = newCommit(suite.GetHeadCommit())
+	return s
+}
+
+type CheckRunAnnotation struct {
+	Path            string  `json:"path,omitempty"`
+	BlobHRef        string  `json:"blob_href,omitempty"`
+	StartLine       float64 `json:"start_line,omitempty"`
+	EndLine         float64 `json:"end_line,omitempty"`
+	StartColumn     float64 `json:"start_column,omitempty"`
+	EndColumn       float64 `json:"end_column,omitempty"`
+	AnnotationLevel string  `json:"annotation_level,omitempty"`
+	Message         string  `json:"message,omitempty"`
+	Title           string  `json:"title,omitempty"`
+	RawDetails      string  `json:"raw_details,omitempty"`
+}
+
+func newCheckRunAnnotation(anno *github.CheckRunAnnotation) *CheckRunAnnotation {
+	if anno == nil {
+		return nil
+	}
+	a := &CheckRunAnnotation{}
+	a.Path = anno.GetPath()
+	a.BlobHRef = anno.GetBlobHRef()
+	a.StartLine = float64(anno.GetStartLine())
+	a.EndLine = float64(anno.GetEndLine())
+	a.StartColumn = float64(anno.GetStartColumn())
+	a.EndColumn = float64(anno.GetEndColumn())
+	a.AnnotationLevel = anno.GetAnnotationLevel()
+	a.Message = anno.GetMessage()
+	a.Title = anno.GetTitle()
+	a.RawDetails = anno.GetRawDetails()
+	return a
+}
+
+type CheckRunImage struct {
+	Alt      string `json:"alt,omitempty"`
+	ImageUrl string `json:"image_url,omitempty"`
+	Caption  string `json:"caption,omitempty"`
+}
+
+func newCheckRunImage(image *github.CheckRunImage) *CheckRunImage {
+	if image == nil {
+		return nil
+	}
+	i := &CheckRunImage{}
+	i.Alt = image.GetAlt()
+	i.ImageUrl = image.GetImageURL()
+	i.Caption = image.GetCaption()
+	return i
+}
+
+type CheckRunOutput struct {
+	Title            string                `json:"title,omitempty"`
+	Summary          string                `json:"summary,omitempty"`
+	Text             string                `json:"text,omitempty"`
+	AnnotationsCount float64               `json:"annotations_count,omitempty"`
+	AnnotationsUrl   string                `json:"annotations_url,omitempty"`
+	Annotations      []*CheckRunAnnotation `json:"annotations,omitempty"`
+	Images           []*CheckRunImage      `json:"images,omitempty"`
+}
+
+func newCheckRunOutput(output *github.CheckRunOutput) *CheckRunOutput {
+	if output == nil {
+		return nil
+	}
+	o := &CheckRunOutput{}
+	o.Title = output.GetTitle()
+	o.Summary = output.GetSummary()
+	o.Text = output.GetText()
+	o.AnnotationsCount = float64(output.GetAnnotationsCount())
+	o.AnnotationsUrl = output.GetAnnotationsURL()
+	for _, annotation := range output.Annotations {
+		o.Annotations = append(o.Annotations, newCheckRunAnnotation(annotation))
+	}
+	for _, image := range output.Images {
+		o.Images = append(o.Images, newCheckRunImage(image))
+	}
+	return o
+}
+
+type CheckRun struct {
+	Id          float64         `json:"id,omitempty"`
+	NodeId      string          `json:"node_id,omitempty"`
+	HeadSha     string          `json:"head_sha,omitempty"`
+	ExternalId  string          `json:"external_id,omitempty"`
+	Url         string          `json:"url,omitempty"`
+	HtmlUrl     string          `json:"html_url,omitempty"`
+	DetailsUrl  string          `json:"details_url,omitempty"`
+	Status      string          `json:"status,omitempty"`
+	Conclusion  string          `json:"conclusion,omitempty"`
+	StartedAt   Timestamp       `json:"started_at,omitempty"`
+	CompletedAt Timestamp       `json:"completed_at,omitempty"`
+	Output      *CheckRunOutput `json:"output,omitempty"`
+	Name        string          `json:"name,omitempty"`
+	CheckSuite  *CheckSuite     `json:"check_suite,omitempty"`
+	App         *App            `json:"app,omitempty"`
+}
+
+func newCheckRun(run *github.CheckRun) *CheckRun {
+	if run == nil {
+		return nil
+	}
+	r := &CheckRun{}
+	r.Id = float64(run.GetID())
+	r.NodeId = run.GetNodeID()
+	r.HeadSha = run.GetHeadSHA()
+	r.ExternalId = run.GetExternalID()
+	r.Url = run.GetURL()
+	r.HtmlUrl = run.GetHTMLURL()
+	r.DetailsUrl = run.GetDetailsURL()
+	r.Status = run.GetStatus()
+	r.Conclusion = run.GetConclusion()
+	t1 := run.GetStartedAt().Time
+	r.StartedAt = newTimestamp(&t1)
+	t2 := run.GetCompletedAt().Time
+	r.CompletedAt = newTimestamp(&t2)
+	r.Output = newCheckRunOutput(run.GetOutput())
+	r.Name = run.GetName()
+	r.CheckSuite = newCheckSuite(run.GetCheckSuite())
+	r.App = newApp(run.GetApp())
+	return r
+}
+
 type PullRequest struct {
 	Url                 string                `json:"url"`
 	Id                  float64               `json:"id"`
@@ -601,11 +787,12 @@ type PullRequest struct {
 	Reviews             []*PullRequestReview  `json:"reviews"`
 	Commits             []*RepositoryCommit   `json:"commits"`
 	Statuses            []*RepoStatus         `json:"statuses"`
+	Checks              []*CheckRun           `json:"checks"`
 	Owner               string                `json:"-"`
 	Repo                string                `json:"-"`
 }
 
-func newPullRequest(owner string, repo string, pull *github.PullRequest, comments []*github.PullRequestComment, reviews []*github.PullRequestReview, commits []*github.RepositoryCommit, statuses []*github.RepoStatus) *PullRequest {
+func newPullRequest(owner string, repo string, pull *github.PullRequest, comments []*github.PullRequestComment, reviews []*github.PullRequestReview, commits []*github.RepositoryCommit, statuses []*github.RepoStatus, checks []*github.CheckRun) *PullRequest {
 	if pull == nil {
 		return nil
 	}
@@ -681,6 +868,10 @@ func newPullRequest(owner string, repo string, pull *github.PullRequest, comment
 	p.Statuses = make([]*RepoStatus, len(statuses))
 	for i, status := range statuses {
 		p.Statuses[i] = newRepoStatus(status)
+	}
+	p.Checks = make([]*CheckRun, len(checks))
+	for i, check := range checks {
+		p.Checks[i] = newCheckRun(check)
 	}
 	p.Owner = owner
 	p.Repo = repo
