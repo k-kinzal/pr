@@ -20,14 +20,19 @@ Usage:
   pr [command]
 
 Available Commands:
+  check       Check if PR matches the rule and change PR status
   help        Help about any command
   merge       Merge PR that matches a rule
   show        Show PR that matches a rule
+  validate    Validate the rules
 
 Flags:
       --exit-code      returns an exit code of 127 if no PR matches the rule
   -h, --help           help for pr
+      --no-exit-code   always returns 0 even if an error occurs
+      --rate int       API call seconds rate limit (default 10)
       --token string   personal access token to manipulate PR [GITHUB_TOKEN]
+      --version        version for pr
 
 Use "pr [command] --help" for more information about a command.
 ```
