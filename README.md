@@ -10,7 +10,7 @@ PR is a CLI tool that operates Pull Request on a rule-based basis.
 ## Get Started
 
 ```bash
-$ curl -L https://github.com/k-kinzal/pr/releases/download/v0.1.0/pr_linux_amd64.tar.gz | tar xz
+$ curl -L https://github.com/k-kinzal/pr/releases/download/v0.2.1/pr_linux_amd64.tar.gz | tar xz
 $ cp pr /usr/local/bin/pr
 $ pr --help
 PR operates multiple Pull Request
@@ -44,7 +44,7 @@ Use "pr [command] --help" for more information about a command.
 Merge PRs that match the rule.
 
 ```bash
-$ pr merge [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+$ pr merge [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) > `3`'
 [...]
 ```
 
@@ -54,14 +54,14 @@ When the PR CLI is run on the CI, the rule status is displayed separately from t
 This is a solution to the problem where multiple CI statuses are displayed in GitHub Action.
 
 ```bash
-$ pr check [owner]/[repo] -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+$ pr check [owner]/[repo] -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses[?state == `"success"` && context == `"ci/circleci: test"`]) == `1`'
 [...]
 ```
 
 Check commands can perform conditional actions.
 
 ```bash
-$ pr check [owner]/[repo] --merge -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+$ pr check [owner]/[repo] --merge -l 'number == `1`' -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) == `1`'
 [...]
 ```
 
@@ -88,9 +88,9 @@ $ pr show [owner]/[repo] --exit-code -l 'number == `1`' -l 'state == `"open"`'
 Validate the rules.
 
 ```bash
-$ pr validate [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses) > `0`' -l 'user.name == `"github-action[bot]"`'
+$ pr validate [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) > `0`' -l 'user.name == `"github-action[bot]"`'
 [x] state == `"open"`: 1 PRs matched the rules
-[x] length(statuses) > `0`: 1 PRs matched the rules
+[x] length(statuses[?state == `"success"`]) > `0`: 1 PRs matched the rules
 [ ] user.name == `"github-action[bot]"`: no PR matches the rule
 []
 ```
