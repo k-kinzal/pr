@@ -36,6 +36,7 @@ func Check(owner string, repo string, opt *CheckOption) ([]*api.PullRequest, err
 		EnableReviews:  opt.EnableReviews,
 		EnableCommits:  opt.EnableCommits,
 		EnableStatuses: true,
+		EnableChecks:   opt.EnableChecks,
 		Rules:          rules.SearchRules(),
 	}
 	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)
