@@ -20,8 +20,8 @@ var (
 	headRegexp        = regexp.MustCompile("head\\s*[=!]=\\s*`\"(.*?)\"`")
 	baseRegexp        = regexp.MustCompile("base\\s*[=!]=\\s*`\"(.*?)\"`")
 	shaRegexp         = regexp.MustCompile("head.sha\\s*[=!]=\\s*`\"(.*?)\"`")
-	dateRegexp        = regexp.MustCompile(`"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`)
-	timeRegexp        = regexp.MustCompile(`"\d{2}:\d{2}:\d{2}"`)
+	dateRegexp        = regexp.MustCompile("`\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z\"`")
+	timeRegexp        = regexp.MustCompile("`\"\\d{2}:\\d{2}:\\d{2}\"`")
 	nowFunctionRegexp = regexp.MustCompile(`now\(\)`)
 )
 
@@ -74,20 +74,20 @@ func (r *PullRequestRules) Add(rule string) {
 	rule = nowFunctionRegexp.ReplaceAllString(rule, now)
 
 	rule = string(dateRegexp.ReplaceAllFunc([]byte(rule), func(bytes []byte) []byte {
-		t, err := time.Parse("2006-01-02T15:04:05Z", strings.Trim(string(bytes), "\""))
+		t, err := time.Parse("2006-01-02T15:04:05Z", strings.Trim(string(bytes), "`\""))
 		if err != nil {
 			return bytes
 		}
-		return []byte(fmt.Sprintf("%d", t.UTC().Unix()))
+		return []byte(fmt.Sprintf("`%d`", t.UTC().Unix()))
 	}))
 
 	rule = string(timeRegexp.ReplaceAllFunc([]byte(rule), func(bytes []byte) []byte {
-		s := fmt.Sprintf("%sT%sZ", time.Now().UTC().Format("2006-01-02"), strings.Trim(string(bytes), "\""))
+		s := fmt.Sprintf("%sT%sZ", time.Now().UTC().Format("2006-01-02"), strings.Trim(string(bytes), "`\""))
 		t, err := time.Parse(dateLayout, s)
 		if err != nil {
 			return bytes
 		}
-		return []byte(fmt.Sprintf("%d", t.UTC().Unix()))
+		return []byte(fmt.Sprintf("`%d`", t.UTC().Unix()))
 	}))
 
 	r.rules = append(r.rules, rule)
