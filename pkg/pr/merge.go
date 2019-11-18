@@ -28,6 +28,7 @@ func Merge(owner string, repo string, opt *MergeOption) ([]*api.PullRequest, err
 		EnableReviews:  opt.EnableReviews,
 		EnableCommits:  opt.EnableCommits,
 		EnableStatuses: opt.EnableStatuses,
+		EnableChecks:   opt.EnableChecks,
 		Rules:          api.NewPullRequestRules(opt.Rules, opt.Limit),
 	}
 	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)

@@ -54,6 +54,7 @@ func Validate(owner string, repo string, opt *ListOption) ([]ValidationResult, [
 		EnableReviews:  opt.EnableReviews,
 		EnableCommits:  opt.EnableCommits,
 		EnableStatuses: opt.EnableStatuses,
+		EnableChecks:   opt.EnableChecks,
 		Rules:          api.NewPullRequestRules([]string{opt.Rules[0]}, opt.Limit),
 	}
 	pulls, err := client.GetPulls(ctx, owner, repo, pullOption)
