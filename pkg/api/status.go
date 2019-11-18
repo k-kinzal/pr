@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"text/template"
 
 	"golang.org/x/sync/errgroup"
@@ -38,6 +39,9 @@ func (c *Client) Status(ctx context.Context, pulls []*PullRequest, opt *StatusOp
 				}
 				description := buf.String()
 				buf.Reset()
+				if len(description) > 140 {
+					description = fmt.Sprintf("%s...", description[:137])
+				}
 
 				if err := contextTemplate.Execute(buf, pull); err != nil {
 					return err
