@@ -108,9 +108,10 @@ See below for a detailed description of each item.
 - [Reviews](https://developer.github.com/v3/pulls/reviews/#list-reviews-on-a-pull-request)
 - [Commits](https://developer.github.com/v3/pulls/#list-commits-on-a-pull-request)
 - [Statuses](https://developer.github.com/v3/repos/statuses/#list-statuses-for-a-specific-ref)
+- [Checks](https://developer.github.com/v3/checks/runs/#list-check-runs-for-a-specific-ref)
 
-`"comments"`, `"reviews"`, `"commits"`, and `"statuses"` cannot be used by default with PR link relation.
-If the parameter is required, specify option `--with-comments`, `--with-reviews`, `--with-commits`, `--with-statuses` or `--with-all`.
+`"comments"`, `"reviews"`, `"commits"`, `"statuses""`, and `"checks"` cannot be used by default with PR link relation.
+If the parameter is required, specify option `--with-comments`, `--with-reviews`, `--with-commits`, `--with-statuses`, `--with-checks` or `--with-all`.
 
 NOTE: `--with-all` options have very poor performance. Not recommended for uses other than debugging.
 
@@ -119,11 +120,11 @@ NOTE: `--with-all` options have very poor performance. Not recommended for uses 
 In PR CLI, rules are specified using [JMESPath](http://jmespath.org/).
 
 ```bash
-$ pr show [owner]/[repo] -l 'state == `"open"`' -l 'length(statuses) == length(statuses[?state == `"success"`])'
+$ pr show [owner]/[repo] -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) >= 1'
 ```
 
 ```
-[?state == `"open"`] | [?length(statuses) == length(statuses[?state == `"success"`])]
+[?state == `"open"`] | [?length(statuses[?state == `"success"`]) >= 1])]
 ```
 
 The specified rule is converted to an expression that combines [Filter Expression](http://jmespath.org/proposals/filter-expressions.html) with a pipe.
@@ -149,7 +150,7 @@ In pr, JMESPath can be extended to use original functions.
 #### now()
 
 ```
-$ pr show [owner]/[repo] -l
+$ pr show [owner]/[repo] -l 'now() == `"2006-01-02T15:04:05Z"`'
 ```
 
 `now()` returns the current unix time.
