@@ -48,7 +48,24 @@ $ pr merge [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(stat
 [...]
 ```
 
-## Check
+### Label
+
+Append/Remove/Replace labels to PRs that match the rule.
+
+```bash
+$ pr label [owner]/[repo] -l 'state == `"open"`' --action "append" --label "foo"
+...
+$ pr label [owner]/[repo] -l 'state == `"open"`' --action "remove" --label "foo"
+...
+$ pr label [owner]/[repo] -l 'state == `"open"`' --action "replace" --label "foo"
+...
+```
+
+`--action "append"` appends the specified label to the PR that matches the rule.
+`--action "remove"` removes the label specified for the PR that matched the rule.
+`--action "replace"` replaces all labels on PR that match the rule with the specified label.
+
+### Check
 
 When the PR CLI is run on the CI, the rule status is displayed separately from the CI.
 This is a solution to the problem where multiple CI statuses are displayed in GitHub Action.
@@ -67,7 +84,7 @@ $ pr check [owner]/[repo] --merge -l 'number == `1`' -l 'state == `"open"`' -l '
 
 For PR with `number == 1`, merge if the condition is met, or change status to pending if the condition is not met.
 
-## Show
+### Show
 
 Check the PR that matches the rule.
 
@@ -83,7 +100,7 @@ $ pr show [owner]/[repo] --exit-code -l 'number == `1`' -l 'state == `"open"`'
 [...]
 ```
 
-## Validate
+### Validate
 
 Validate the rules.
 
