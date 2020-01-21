@@ -65,6 +65,23 @@ $ pr label [owner]/[repo] -l 'state == `"open"`' --action "replace" --label "foo
 `--action "remove"` removes the label specified for the PR that matched the rule.
 `--action "replace"` replaces all labels on PR that match the rule with the specified label.
 
+### Assignee
+
+Append/Remove/Replace assignees to PRs that match the rule.
+
+```bash
+$ pr assignees [owner]/[repo] -l 'state == `"open"`' --action "append" --assignee "foo"
+...
+$ pr assignees [owner]/[repo] -l 'state == `"open"`' --action "remove" --assignee "foo"
+...
+$ pr assignees [owner]/[repo] -l 'state == `"open"`' --action "replace" --assignee "foo"
+...
+```
+
+`--action "append"` appends the specified label to the PR that matches the rule.
+`--action "remove"` removes the label specified for the PR that matched the rule.
+`--action "replace"` replaces all labels on PR that match the rule with the specified label.
+
 ### Check
 
 When the PR CLI is run on the CI, the rule status is displayed separately from the CI.
