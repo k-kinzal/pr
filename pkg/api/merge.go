@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"net/http"
 	"text/template"
 	"time"
 
@@ -12,6 +13,9 @@ import (
 
 	"github.com/google/go-github/v28/github"
 )
+
+const mergeRetryCount = 6
+const mergeRetryIntervalSec = 10
 
 type MergeOption struct {
 	CommitTitleTemplate   string
@@ -47,20 +51,25 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt *MergeOpti
 					CommitTitle: commitTitle,
 					MergeMethod: opt.MergeMethod,
 				}
-				result, _, err := c.github.PullRequests.Merge(ctx, pull.Owner, pull.Repo, int(pull.Number), commitMessage, o)
-				if err != nil {
-					return err
-				}
-				if !result.GetMerged() {
-					return xerrors.New(result.GetMessage())
+				for i := 0; i < mergeRetryCount; i++ {
+					result, res, err := c.github.PullRequests.Merge(ctx, pull.Owner, pull.Repo, int(pull.Number), commitMessage, o)
+					if err != nil {
+						return err
+					}
+					if result.GetMerged() {
+						pull.State = state
+						pull.UpdatedAt = now
+						pull.ClosedAt = now
+						pull.MergedAt = now
+						pull.MergeCommitSha = *result.SHA
+						break
+					}
+					if res.StatusCode != http.StatusMethodNotAllowed || i+1 == mergeRetryCount {
+						return xerrors.New(result.GetMessage())
+					}
 
+					time.Sleep(time.Second * mergeRetryIntervalSec)
 				}
-
-				pull.State = state
-				pull.UpdatedAt = now
-				pull.ClosedAt = now
-				pull.MergedAt = now
-				pull.MergeCommitSha = *result.SHA
 
 				return nil
 			}
