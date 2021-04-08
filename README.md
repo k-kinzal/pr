@@ -20,9 +20,12 @@ Usage:
   pr [command]
 
 Available Commands:
+  assignee    Manipulate assignees that match a rule
   check       Check if PR matches the rule and change PR status
   help        Help about any command
+  label       Manipulate labels that match a rule
   merge       Merge PR that matches a rule
+  review      Add review to PRs that match rules
   show        Show PR that matches a rule
   validate    Validate the rules
 
@@ -47,6 +50,17 @@ Merge PRs that match the rule.
 $ pr merge [owner]/[repo] --with-statuses -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) > `3`'
 [...]
 ```
+
+### Review
+
+Add a review to PRs that match the rule.
+
+```bash
+$ pr review [owner]/[repo] --action "approve" --with-statuses -l 'state == `"open"`' -l 'length(statuses[?state == `"success"`]) > `3`'
+[...]
+```
+
+`--action "approve"` adds approval to the PR that matches the rule.
 
 ### Label
 
