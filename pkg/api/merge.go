@@ -9,13 +9,11 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"golang.org/x/xerrors"
-
 	"github.com/google/go-github/v28/github"
 )
 
-const mergeRetryCount = 6
-const mergeRetryIntervalSec = 10
+const mergeRetryCount = 30
+const mergeRetryIntervalSec = 2
 
 type MergeOption struct {
 	CommitTitleTemplate   string
@@ -52,8 +50,15 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt *MergeOpti
 					MergeMethod: opt.MergeMethod,
 				}
 				for i := 0; i < mergeRetryCount; i++ {
-					result, res, err := c.github.PullRequests.Merge(ctx, pull.Owner, pull.Repo, int(pull.Number), commitMessage, o)
+					result, _, err := c.github.PullRequests.Merge(ctx, pull.Owner, pull.Repo, int(pull.Number), commitMessage, o)
 					if err != nil {
+						if e, ok := err.(*github.ErrorResponse); ok && e.Response.StatusCode == http.StatusMethodNotAllowed {
+							if i+1 == mergeRetryCount {
+								return err
+							}
+							time.Sleep(time.Second * mergeRetryIntervalSec)
+							continue
+						}
 						return err
 					}
 					if result.GetMerged() {
@@ -64,13 +69,7 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt *MergeOpti
 						pull.MergeCommitSha = *result.SHA
 						break
 					}
-					if res.StatusCode != http.StatusMethodNotAllowed || i+1 == mergeRetryCount {
-						return xerrors.New(result.GetMessage())
-					}
-
-					time.Sleep(time.Second * mergeRetryIntervalSec)
 				}
-
 				return nil
 			}
 		}(pull))
@@ -78,5 +77,6 @@ func (c *Client) Merge(ctx context.Context, pulls []*PullRequest, opt *MergeOpti
 	if err := eg.Wait(); err != nil {
 		return nil, err
 	}
+
 	return pulls, nil
 }
