@@ -514,8 +514,8 @@ func newRepositoryCommit(commit *github.RepositoryCommit) *RepositoryCommit {
 	c.Author = newUser(commit.GetAuthor())
 	c.Committer = newUser(commit.GetCommitter())
 	c.Parents = make([]*Commit, len(commit.Parents))
-	for i, v := range commit.Parents {
-		c.Parents[i] = newCommit(&v)
+	for i := range commit.Parents {
+		c.Parents[i] = newCommit(&commit.Parents[i])
 	}
 	return c
 }

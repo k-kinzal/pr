@@ -21,6 +21,7 @@ type LabelFunc func(labels []string) []string
 
 func RandomizeLabel(labels []string) []string {
 	rand.Seed(time.Now().UnixNano())
+	// #nosec
 	return []string{labels[rand.Intn(len(labels)-1)]}
 }
 
