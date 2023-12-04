@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.17
     working_directory: /go/src/github.com/k-kinzal/pr
     steps:
       - checkout
@@ -20,7 +20,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.17
     working_directory: /go/src/github.com/k-kinzal/pr
     environment:
       TEST_RESULTS: /tmp/test-results
@@ -52,7 +52,7 @@ jobs:
 
   release:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.17
     working_directory: /go/src/github.com/k-kinzal/pr
     steps:
       - checkout
