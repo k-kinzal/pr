@@ -20,9 +20,9 @@ func ValidateRun(cmd *cobra.Command, args []string) error {
 	}
 	for _, res := range result {
 		if res.Success() {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("[x] %s", res.String()))
+			fmt.Fprintf(os.Stderr, "[x] %s\n", res.String())
 		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("[ ] %s", res.String()))
+			fmt.Fprintf(os.Stderr, "[ ] %s\n", res.String())
 		}
 	}
 
