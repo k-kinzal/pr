@@ -21,6 +21,7 @@ type AssigneeFunc func(assignees []string) []string
 
 func RandomizeAssignee(assignees []string) []string {
 	rand.Seed(time.Now().UnixNano())
+	// #nosec
 	return []string{assignees[rand.Intn(len(assignees)-1)]}
 }
 
