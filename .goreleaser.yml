@@ -17,7 +17,6 @@ dockers:
   - image_templates:
       - docker.io/kinzal/{{ .ProjectName }}:latest-amd64
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Version }}-amd64
-      - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}-amd64
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-amd64
     use: buildx
     goos: linux
@@ -27,7 +26,6 @@ dockers:
   - image_templates:
       - docker.io/kinzal/{{ .ProjectName }}:latest-arm64
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Version }}-arm64
-      - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}-arm64
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-arm64
     use: buildx
     goos: linux
@@ -44,10 +42,6 @@ docker_manifests:
     image_templates:
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Version }}-amd64
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Version }}-arm64
-  - name_template: docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}
-    image_templates:
-      - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}-amd64
-      - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}-arm64
   - name_template: docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}
     image_templates:
       - docker.io/kinzal/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-amd64
