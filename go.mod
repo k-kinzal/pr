@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/google/go-github/v28 v28.1.1
+	github.com/google/go-github/v57 v57.0.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jarcoal/httpmock v1.0.4
 	github.com/jmespath/go-jmespath v0.4.0
