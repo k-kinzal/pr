@@ -9,7 +9,7 @@ require (
 	github.com/jarcoal/httpmock v1.0.4
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/time v0.5.0
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9
