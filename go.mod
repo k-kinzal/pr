@@ -8,7 +8,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jarcoal/httpmock v1.0.4
 	github.com/jmespath/go-jmespath v0.4.0
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	golang.org/x/oauth2 v0.26.0
 	golang.org/x/sync v0.11.0
 	golang.org/x/time v0.10.0
