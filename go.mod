@@ -6,7 +6,7 @@ require (
 	github.com/google/go-github/v28 v28.1.1
 	github.com/google/go-github/v59 v59.0.0
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/jarcoal/httpmock v1.0.4
+	github.com/jarcoal/httpmock v1.4.1
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/oauth2 v0.26.0
